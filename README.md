@@ -2,6 +2,7 @@
 
 为 [DeepSeek Harness](https://github.com/deepseek-ai) 网页端（`dsh web`）提供 Token 用量看板的插件：它把本机会话日志折叠成日/提供商/模型三个维度的统计，在侧边栏加一个「使用统计」入口，并渲染今日、本月与所选区间的消耗卡片、3/6/12 个月热力日历、点开某天查看按来源拆分的明细（含缓存命中率）、提供商与模型排行，以及 Token 与调用次数的双轴趋势图；全部数据只来自本机、不联网不上报，插件也只写自己的统计与缓存文件。
 
+[![npm](https://img.shields.io/npm/v/dsh-token-board?color=cb3837)](https://www.npmjs.com/package/dsh-token-board)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%5E22.19%20%7C%7C%20%3E%3D24-brightgreen)](package.json)
 
@@ -25,6 +26,8 @@
 ```bash
 dsh plugin --profile web add "dsh-token-board"
 ```
+
+> 从 [npm](https://www.npmjs.com/package/dsh-token-board) 安装，当前版本 `0.1.0`。
 
 升级到最新发布版本：
 

@@ -1,8 +1,43 @@
 # 发布到 npm
 
 包名：`dsh-token-board`（裸名，无 scope）
-当前版本：`0.1.0`
+当前版本：`0.1.0` —— **已发布**
 发布地址：https://www.npmjs.com/package/dsh-token-board
+
+## 发布记录
+
+2026-11-06 首次发布成功，registry 侧验证结果：
+
+| 项 | 值 |
+|---|---|
+| `dist-tags.latest` | `0.1.0` |
+| tarball shasum | `2f032402b00c5dbc718435d0000edac4e77861a0`（与本地 `npm publish` 输出一致） |
+| license | `MIT` |
+| `dsh.bundle.patch` | `./cordis.patch.yml` |
+| 包大小 | 92.4 kB（解包 304.4 kB，10 个文件） |
+
+从 registry 实装验证（不是本地文件）：
+
+```
+dsh plugin --profile web add dsh-token-board   → bundles 自动登记 dsh-token-board
+dsh --dump-config --profile web                → - id: usage-dashboard / name: dsh-token-board（恰好 1 条）
+import('dsh-token-board')                      → OK，inject 三服务齐全
+readPluginMeta                                 → error 无、icon 1478 字节
+重跑 add（升级路径）                            → Already up to date，不重复登记
+remove                                          → bundles 与 dependencies 双清
+```
+
+### 关于 registry 上的 `0.0.0-stage`
+
+发布后 registry 里会有一个 `0.0.0-stage` 版本（描述
+"Temporary package placeholder for staged publishing"）。这是 npm 发布流程的
+临时占位版本，`_npmUser` 就是发布者本人，比正式版早约 56 秒出现，内容是
+366 字节的 `package.json` + `README.md`，**不含任何代码**。它不被 `latest`
+引用，普通 `npm install dsh-token-board` 拿到的仍是 `0.1.0`，无需处理。
+
+> 注意：npm 在发布成功后显示 "Your package is being processed and may take a
+> few minutes to become available"。此时立即 `npm view` 可能**只看到占位版本**，
+> 看起来像"被占用"或"发错了"。等 30–60 秒再查即可，`latest` 会指向正式版。
 
 ## 为什么叫这个名字
 
