@@ -2,7 +2,7 @@
   "name": "dsh-token-board",
   "version": "0.1.1",
   "type": "module",
-  "description": "Token usage dashboard for the DSH web GUI: metric cards, a three-month daily heat calendar with token/call toggling, click-through day detail with provider breakdown, provider and model rankings, and a dual-metric trend chart.",
+  "description": "Token usage dashboard for the DeepSeek Harness Web GUI (dsh web and DSH Desktop): metric cards, a three-month heat calendar, click-through day detail with provider breakdown, provider and model rankings, and a dual-metric trend chart. Reads local session logs only; no network access.",
   "icon": "icon.svg",
   "main": "./lib/index.js",
   "exports": {
@@ -24,7 +24,8 @@
     "LICENSE",
     "ORIGINALITY.md",
     "scripts/check-client.mjs",
-    "scripts/dst.mjs"
+    "scripts/dst.mjs",
+    "scripts/offline-backfill.mjs"
   ],
   "keywords": [
     "dsh",
@@ -55,11 +56,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/HTempt/dsh-usage-dashboard.git"
+    "url": "git+https://github.com/HTempt/dsh-token-board.git"
   },
-  "homepage": "https://github.com/HTempt/dsh-usage-dashboard#readme",
+  "homepage": "https://github.com/HTempt/dsh-token-board#readme",
   "bugs": {
-    "url": "https://github.com/HTempt/dsh-usage-dashboard/issues"
+    "url": "https://github.com/HTempt/dsh-token-board/issues"
   },
   "author": "HTempt",
   "publishConfig": {
