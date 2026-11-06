@@ -6,7 +6,7 @@
  *
  * This is the broad real-data check; the focused regressions live beside it
  * (`singleledger`, `transition`, `migrate`, `unit`) and the exact comparison
- * against the sibling plugin is `reconcile.mjs`.
+ * against an external CSV is `reconcile.mjs`.
  *
  *   node scripts/smoke-host.mjs
  */

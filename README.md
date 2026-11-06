@@ -59,10 +59,10 @@ dsh plugin --profile web add "github:HTempt/dsh-usage-dashboard"
 dsh plugin --profile web add "github:HTempt/dsh-usage-dashboard#<commit-sha>"
 ```
 
-> **注意包名**：本项目曾计划叫 `dsh-usage-dashboard`，但 npm 上那个名字
-> **已被另一作者的无关插件占用**（[zzdscs/dsh-usage-dashboard](https://github.com/1690834643/dsh-usage-dashboard)），
-> 直接 `add dsh-usage-dashboard` 会装错东西。发布名是 `dsh-token-board`；
-> `dsh-usage-board` 与 `dsh-token-dashboard` 也各有同类的既有插件，同样不要用。
+> **注意包名**：本项目**只以 `dsh-token-board` 发布**。npm 上若干相近名称
+> （如 `dsh-usage-dashboard`、`dsh-usage-board`、`dsh-token-dashboard`）
+> 已被其他发布者注册，均为各自独立、与本项目无关的包。安装时请认准
+> `dsh-token-board`，不要按相似名字去装。
 
 > **若从 git 安装时报 `allowBuilds` 相关错误**：pnpm 默认阻止 git 依赖执行
 > `prepare` 脚本。本包没有 `prepare` 脚本，正常情况下不会触发；万一被拦，按 pnpm
@@ -120,6 +120,7 @@ const inject = ["webServer", "sessionPersistence", "sessions"];
 | 文件 | 内容 |
 |---|---|
 | 本文件 | 安装、口径、数据模型、已知限制 |
+| [ORIGINALITY.md](ORIGINALITY.md) | 代码原创性核查、运行时依赖、读写范围 |
 | [THIRD-PARTY.md](THIRD-PARTY.md) | 随仓库附带的第三方资产与其许可 |
 | [LICENSE](LICENSE) | MIT |
 
@@ -197,7 +198,7 @@ const inject = ["webServer", "sessionPersistence", "sessions"];
 2026-11-02T03  vendor-alpha/model-x  聚合 89.9M / 会话折叠 44.9M  ratio 2.00
 ```
 
-现在与 `dsh-usage-stats` 0.3.7 一致：**每个 session 一份折叠 + `kind` 标记**，
+**每个 session 一份折叠 + `kind` 标记**，
 标明它当前由哪个来源喂着（`live` / `persisted`）。来源切换时整份重折，
 而不是把两个来源的产物叠起来。
 
@@ -250,23 +251,25 @@ const inject = ["webServer", "sessionPersistence", "sessions"];
 ## 写盘范围（只写自己的文件）
 
 唯一写入是 `<DSH_HOME>/storages/usage-dashboard-cache.json`（临时文件 + rename 原子写）。
-会话存储、共享 ledger、`dsh-usage-stats` 的缓存都不写。删掉该文件只会触发一次重建。
+会话存储、共享 ledger、其它插件的缓存都不写。删掉该文件只会触发一次重建。
 
-## 口径（与 dsh-usage-stats 一致）
+## 口径
 
 - **调用次数** = 有 usage 样本的请求数（不计失败尝试、不计重试）；
 - `failedCalls` / `retries` 另存，成功率按尝试数计算；
 - 合并 `usage-ledger.json`：按 (天, 提供商家族) 取 token 较大侧、**绝不求和**，调用按模型取大；
 - fork 会话按 `inheritedEventCount` 跳过继承前缀，避免父会话的用量被重算。
 
-### 与官方插件的实测一致性（2026-11-02）
+### 与外部 CSV 导出的实测一致性（2026-11-02）
 
-用官方 `GET /api/usage-stats/export/daily.csv` 作为基准，逐日逐模型对比：
+以本机可用的一个独立实现导出的日粒度 CSV 作为基准，逐日逐模型对比：
 
 ```
 窗口内 70 天，69 天完全相等；唯一差异是当天仍在写入的那一行
-（dash 比 CSV 多 5.2M token / 6 calls，同一会话的后续增量，属预期）
+（本插件比基准多 5.2M token / 6 calls，同一会话的后续增量，属预期）
 ```
+
+该比对只用于验证本插件的折叠口径，不依赖、也不包含对照实现的任何代码。
 
 
 ## 接口
@@ -316,7 +319,7 @@ node scripts/transition.mjs    # live→落盘→扫描 不变
 node scripts/migrate.mjs       # v3 缓存迁移不丢历史
 node scripts/timezone.mjs      # 窗口/本月跟随浏览器时区
 node scripts/smoke-host.mjs    # 真实库自洽 + 重复读一致
-node scripts/reconcile.mjs     # 与官方 CSV 逐日逐模型对账
+node scripts/reconcile.mjs     # 与外部 CSV 导出逐日逐模型对账
 ```
 
 `reconcile.mjs` 是这次修复的验收：它用真实日志跑本插件，再拿
@@ -331,7 +334,7 @@ node scripts/reconcile.mjs     # 与官方 CSV 逐日逐模型对账
 
 ```
 lib/usage.js        纯函数：小时折叠、日投影、行排序。可在宿主外单测。
-lib/ledger-merge.js 共享 ledger 合并（与 dsh-usage-stats 同一规则）。
+lib/ledger-merge.js 共享 ledger 合并：按 (天, 提供商家族) 取较大侧，绝不求和。
 lib/index.js        宿主半：读持久化、插件私有缓存、聚合器、两个路由。
 lib/client.js       浏览器半：手写 __ModuleLoader__ bundle（无构建步骤）。
 scripts/            验证脚本（见上）；harness.mjs 负责解析 harness 包。
@@ -356,7 +359,7 @@ node preview/verify-single-source.mjs   # 无头校验：页面渲染成功且�
 - 不计价：只统计 Token 与调用次数，不折算金额（不同路由的定价口径不统一）。
 - 不带别名合并：`vendor` 与 `vendor-ai` 这类同源路由按原始名称分别统计，不合并。
 - **今天仍在写入的会话**每次刷新都会长一点：面板按读的时刻折叠内存事件，
-  与官方插件差几秒就会差几条调用，这是数据在变，不是口径不一致。
+  两次读取之间就可能差几条调用，这是数据在变，不是口径不一致。
 - 首次全量折叠期间页面显示的是部分数据（有横幅提示）；仅首次如此，之后走缓存。
 - v3 缓存迁移保留 token 与调用数，但那些「增量后又重扫」的会话
   `failedCalls` / `retries` 可能偏高几次（token 不受影响）；删掉缓存文件即精确重建。

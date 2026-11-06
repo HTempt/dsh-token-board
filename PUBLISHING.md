@@ -41,17 +41,23 @@ remove                                          → bundles 与 dependencies 双
 
 ## 为什么叫这个名字
 
-原计划用 `dsh-usage-dashboard`，但 npm 上已被他人占用。候选名里几个同类的也都
-名花有主，最终选 `dsh-token-board`：
+原计划用 `dsh-usage-dashboard`，但 npm 上该名称已被其他发布者注册。相近的候选名
+也大多名花有主（此处不点名具体归属，只记状态），最终选定 `dsh-token-board`：
 
 | 候选名 | npm 状态 |
 |---|---|
-| `dsh-usage-dashboard` | ❌ 已被 `zzdscs` 占用（另一插件） |
-| `dsh-usage-board` | ❌ 已占用（同类用量看板） |
-| `dsh-token-dashboard` | ❌ 已占用（同类 token 统计，2026-08-18） |
-| `dsh-usage-panel` / `dsh-token-meter` / `dsh-usage-board` | ❌ 已占用 |
+| `dsh-usage-dashboard` | ❌ 已被其他发布者注册 |
+| `dsh-usage-board` | ❌ 已被其他发布者注册 |
+| `dsh-token-dashboard` | ❌ 已被其他发布者注册 |
+| `dsh-usage-panel` / `dsh-token-meter` | ❌ 已被其他发布者注册 |
 | **`dsh-token-board`** | ✅ 可用，发布即为本包 |
 | `dsh-token-view` / `dsh-token-lens` / `dsh-tokendash` / `dsh-usage-kit` | ✅ 备选（未采用） |
+
+查询方式：`curl -s -o /dev/null -w "%{http_code}" https://registry.npmjs.org/<name>`
+（`404` = 未注册可用，`200` = 已被占用）。
+
+> 本节只记录命名过程与可用性检测方法，**不评价、不比较任何其他包**。名称相近
+> 不代表功能或来源相关，第三方包与本案各自独立。
 
 ## 发布前已完成的准备
 
@@ -175,8 +181,8 @@ dsh plugin --profile web add dsh-token-board@latest
 
 ## 已知的坑
 
-- **别用 `dsh-usage-dashboard`**：npm 上属于另一作者的无关插件。
-  `dsh-usage-board`、`dsh-token-dashboard` 同样是别人的同类插件。
+- **只认 `dsh-token-board`**：npm 上若干相近名称已被其他发布者注册（与本项目无关），
+  不要按相似名字安装。
 - **`private: true` 会阻止发布**：报 `This package has been marked as private
   and cannot be published`。已删除，别加回来。
 - **`files[]` 必须含 `cordis.patch.yml`**：少了它包能发布但**装不上**，

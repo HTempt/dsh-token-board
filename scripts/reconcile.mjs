@@ -1,11 +1,16 @@
 /**
- * Reconcile this plugin's fold against the sibling plugin's daily CSV export.
+ * Reconcile this plugin's fold against an independent daily CSV export.
  *
- * The dashboard and `@ychris12138/dsh-usage-stats` read the SAME session logs, so
- * their per-day token totals must agree exactly. This script mounts the real
- * persistence backend over the real store with an EMPTY live session list, asks
- * the plugin's own route for its payload, and diffs it against
+ * Both sides read the SAME session logs, so their per-day token totals must
+ * agree exactly. This script mounts the real persistence backend over the real
+ * store with an EMPTY live session list, asks the plugin's own route for its
+ * payload, and diffs it against a CSV served at
  * `GET /api/usage-stats/export/daily.csv`.
+ *
+ * The CSV endpoint belongs to whatever implementation happens to be running
+ * alongside; this script is an OPTIONAL cross-check and fails loudly when that
+ * route is absent. No code from that implementation is used here — only the
+ * numbers it exports.
  *
  * This is the acceptance check for the "today is inaccurate" bug: before the
  * single-ledger fix, today read roughly DOUBLE the CSV figure.
@@ -86,7 +91,7 @@ for (let attempt = 0; attempt < 400; attempt += 1) {
 	if (payload.refreshing === false && payload.partial === false) break;
 }
 
-/** Fetch the sibling plugin's daily CSV and group it by date and model. */
+/** Fetch the reference CSV and group it by date and model. */
 const response = await fetch(`${base}/api/usage-stats/export/daily.csv`);
 if (!response.ok) throw new Error(`daily CSV unavailable: HTTP ${response.status}`);
 const lines = (await response.text()).replace(/^\uFEFF/, "").trim().split(/\r?\n/);
@@ -155,5 +160,5 @@ if (failures.length > 0) {
 	console.log(`FAIL: ${failures.length} day(s) disagree outside today`);
 	process.exit(1);
 }
-console.log("OK: every settled day matches the sibling plugin exactly");
+console.log("OK: every settled day matches the reference CSV exactly");
 process.exit(0);
