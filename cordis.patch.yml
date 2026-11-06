@@ -4,4 +4,4 @@
 # browser half (exports "./client") load in the web GUI.
 - insert:
     - id: usage-dashboard
-      name: 'dsh-usage-dashboard'
+      name: '@htempt/dsh-usage-dashboard'

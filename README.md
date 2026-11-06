@@ -20,57 +20,61 @@
 
 ## 安装
 
-> ⚠️ **本包的 npm 名称 `dsh-usage-dashboard` 已被他人占用**
-> （[zzdscs/dsh-usage-dashboard](https://github.com/1690834643/dsh-usage-dashboard)，另一个插件）。
-> 所以下面一律使用 **GitHub 来源**安装，不要写裸包名。
-
 一条命令完成安装（`dsh plugin` 会把参数转发给 pnpm，并自动登记 bundle）：
 
 ```bash
-dsh plugin --profile web add "github:HTempt/dsh-usage-dashboard"
+dsh plugin --profile web add "@htempt/dsh-usage-dashboard"
 ```
 
-升级到最新提交（同一条，重跑即可）：
+升级到最新发布版本：
 
 ```bash
-dsh plugin --profile web add "github:HTempt/dsh-usage-dashboard"
+dsh plugin --profile web add "@htempt/dsh-usage-dashboard@latest"
 ```
 
 卸载：
 
 ```bash
-dsh plugin --profile web remove dsh-usage-dashboard
+dsh plugin --profile web remove "@htempt/dsh-usage-dashboard"
 ```
 
 Desktop 用户把 `--profile web` 换成 `--profile desktop`。装完**重启对应的 DSH Host**
 （只刷新浏览器窗口不会加载新的服务端插件），然后 Ctrl+F5。
 
-锁定到某个提交安装（避免跟随 `main` 变化）：
+锁定到某个版本（避免跟随 `latest` 变化）：
 
 ```bash
+dsh plugin --profile web add "@htempt/dsh-usage-dashboard@0.1.0"
+```
+
+### 若 npm 上还没有这个版本
+
+也可以直接从本仓库对应提交安装，内容与 npm 包一致：
+
+```bash
+dsh plugin --profile web add "github:HTempt/dsh-usage-dashboard"
 dsh plugin --profile web add "github:HTempt/dsh-usage-dashboard#<commit-sha>"
 ```
 
-### 为什么不用 `npm` 名安装
-
-`dsh plugin add <包名>` 默认从 npm registry 取包。本包与 npm 上同名包**不是同一个项目**，
-若直接 `add dsh-usage-dashboard`，装到的是别人的插件。GitHub 来源由 pnpm 直接拉取本仓库，
-不存在这个歧义。
+> **注意包名**：早期版本曾叫 `dsh-usage-dashboard`（无 scope）。npm 上这个名字
+> **已被另一作者的无关插件占用**，直接 `add dsh-usage-dashboard` 会装错东西。
+> 请始终使用带 scope 的 `@htempt/dsh-usage-dashboard`。
 
 > **若从 git 安装时报 `allowBuilds` 相关错误**：pnpm 默认阻止 git 依赖执行
 > `prepare` 脚本。本包没有 `prepare` 脚本，正常情况下不会触发；万一被拦，按 pnpm
 > 打印的键名把它加进 profile 的 `pnpm-workspace.yaml` → `allowBuilds` 后重跑。
+> 从 npm 安装不会遇到这个问题。
 
 ### 装完应该看到什么
 
 ```bash
 dsh --dump-config --profile web | grep -A1 usage-dashboard
 # - id: usage-dashboard
-#   name: dsh-usage-dashboard      ← 全树恰好出现 1 次
+#   name: '@htempt/dsh-usage-dashboard'      ← 全树恰好出现 1 次
 ```
 
-`dsh plugin add` 会自动把 `dsh-usage-dashboard` 写进 profile `package.json` 的
-`dsh.profile.bundles`，并加进 `dependencies`；`remove` 会同时清掉两处。
+`dsh plugin add` 会自动把 `@htempt/dsh-usage-dashboard` 写进 profile `package.json`
+的 `dsh.profile.bundles`，并加进 `dependencies`；`remove` 会同时清掉两处。
 **不要手工再在 profile 的 `cordis.patch.yml` 里写 insert**——注册点只有一个
 （`dsh.profile.bundles`，行由本包自带的 `cordis.patch.yml` 插入）。手工重复注册会让
 插件管理页的卡片读成「已关闭」而组件行显示「运行中」，因为开关只认 bundles，
@@ -284,7 +288,7 @@ const inject = ["webServer", "sessionPersistence", "sessions"];
 
 - **注册点只有一个**：`dsh.profile.bundles`。行本身由本包自带的
   `cordis.patch.yml`（`dsh.bundle.patch`）插入
-  `- id: usage-dashboard / name: dsh-usage-dashboard`。不要在 profile 自己的
+  `- id: usage-dashboard / name: @htempt/dsh-usage-dashboard`。不要在 profile 自己的
   `cordis.patch.yml` 里再写一遍。
 - **`cordis.patch.yml` 必须在发布内容里**：它同时出现在 `package.json` 的
   `files` 数组里。漏掉它的后果不是「少一个文件」而是**插件装不上**——
