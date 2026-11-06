@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="udw-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.96"/>
+      <stop offset="1" stop-color="#eef2ff" stop-opacity="0.96"/>
+    </linearGradient>
+    <linearGradient id="udw-bar" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4d6bfe"/>
+      <stop offset="1" stop-color="#2f45c8"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="62" height="62" rx="14" fill="url(#udw-bg)" stroke="#c9d2ff" stroke-width="1.5"/>
+  <g fill="url(#udw-bar)">
+    <rect x="12" y="33" width="6" height="19" rx="2"/>
+    <rect x="21" y="26" width="6" height="26" rx="2"/>
+    <rect x="30" y="19" width="6" height="33" rx="2"/>
+    <rect x="39" y="24" width="6" height="28" rx="2" opacity="0.75"/>
+    <rect x="48" y="30" width="6" height="22" rx="2" opacity="0.55"/>
+  </g>
+  <path d="M12 22 h12 l4 -6 l6 10 l5 -7 h13" fill="none" stroke="#05b37a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

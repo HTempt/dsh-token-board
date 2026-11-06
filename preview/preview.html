@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>dsh-usage-dashboard preview</title>
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="theme-tokens.css" />
+<style>
+  html, body { margin: 0; height: 100%; background: var(--dsw-alias-bg-base); }
+  body { font-family: var(--dsw-font-family); }
+  #mount { height: 100vh; }
+</style>
+</head>
+<body>
+<div id="mount"></div>
+<script src="react.js"></script>
+<script src="react-dom.js"></script>
+<script src="fixture.js"></script>
+<script src="loader.js"></script>
+<script>
+(function main() {
+	const params = new URLSearchParams(window.location.search);
+	const scene = params.get("scene") ?? "loaded";
+	const locale = params.get("locale") ?? "zh";
+	if (params.get("theme") === "dark") document.documentElement.setAttribute("data-ds-dark-theme", "");
+	if (params.get("theme") === "dark") document.body.setAttribute("data-ds-dark-theme", "");
+	const tab = params.get("tab") ?? null;
+	const width = Number(params.get("w") ?? 0);
+	window.__PREVIEW_LOCALE__ = locale;
+
+	// Fixture data, or a synthetic state for the non-loaded scenes.
+	const basePayload = window.__FIXTURE__;
+
+	/** Remove or reshape the payload for the synthetic scenes. */
+	function payloadFor(sceneName) {
+		if (sceneName === "empty") {
+			return Object.assign({}, basePayload, { days: [], windowTotals: basePayload.windowTotals, partial: false, refreshing: false });
+		}
+		if (sceneName === "partial") return Object.assign({}, basePayload, { partial: true, refreshing: true });
+		return basePayload;
+	}
+
+	// Intercept the host endpoints so the page renders without a host.
+	const originalFetch = window.fetch.bind(window);
+	window.fetch = function (input, init) {
+		const url = String(input);
+		if (url.startsWith("/api/usage-dashboard/summary")) {
+			if (scene === "error") {
+				return Promise.resolve(new Response("boom", { status: 500 }));
+			}
+			if (scene === "loading") {
+				// Never resolves during the screenshot window.
+				return new Promise((resolve, reject) => {
+					init?.signal?.addEventListener("abort", () => reject(Object.assign(new Error("aborted"), { name: "AbortError" })));
+				});
+			}
+			return Promise.resolve(new Response(JSON.stringify(payloadFor(scene)), { status: 200, headers: { "content-type": "application/json" } }));
+		}
+		return originalFetch(input, init);
+	};
+
+	window.__PREVIEW_LOAD__().then((mod) => {
+		const page = mod.__previewPage;
+		if (typeof page !== "function") {
+			document.getElementById("mount").textContent = "client bundle did not expose the preview entry";
+			return;
+		}
+		const root = ReactDOM.createRoot(document.getElementById("mount"));
+		root.render(React.createElement(page, {
+			t: window.__PREVIEW_TRANSLATE__,
+			initialState: { tab: tab ?? "overview", metric: params.get("metric") ?? "tokens" }
+		}));
+		if (width > 0) {
+			// Force a real narrow layout: headless Chrome refuses to shrink its
+			// viewport below ~512px, so the container is constrained instead and
+			// the page's container queries see the narrow width.
+			const mount = document.getElementById("mount");
+			mount.style.width = `${width}px`;
+			mount.style.overflow = "hidden";
+			mount.style.borderRight = "1px dashed #ccc";
+		}
+		window.__PREVIEW_READY__ = true;
+	}).catch((error) => {
+		document.getElementById("mount").textContent = `preview failed: ${error.message}`;
+		console.error(error);
+	});
+})();
+</script>
+<script>
+window.addEventListener("load", () => setTimeout(() => {
+	const root = document.querySelector('[data-dsh-usage-dashboard-view]');
+	const page = document.querySelector('.udw_page');
+	const scroller = document.querySelector('.udw_scroll');
+	const wide = [];
+	for (const el of document.querySelectorAll('*')) {
+		const r = el.getBoundingClientRect();
+		if (r.right > window.innerWidth + 1) wide.push((el.className || el.tagName) + '@' + Math.round(r.right));
+	}
+	window.__MEASURE__ = {
+		viewport: window.innerWidth,
+		rootW: root ? root.getBoundingClientRect().width : null,
+		pageW: page ? page.getBoundingClientRect().width : null,
+		pageScrollW: page ? page.scrollWidth : null,
+		docScrollW: document.documentElement.scrollWidth,
+		wide: wide.slice(0, 10)
+	};
+	const node = document.createElement('pre');
+	node.id = 'measure';
+	node.textContent = JSON.stringify(window.__MEASURE__);
+	document.body.appendChild(node);
+}, 2500));
+</script>
+</body>
+</html>

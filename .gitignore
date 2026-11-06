@@ -1,0 +1,27 @@
+# Prerequisites
+node_modules/
+
+# Local preview output and scratch homes
+.preview-home/
+.smoke-home/
+.reconcile-home/
+.verify-home*/
+preview/server.log
+
+# Private fixtures: make-fixture.mjs folds REAL session logs and writes your
+# own workspace paths, provider routes and token totals. Regenerate the
+# committed one with `node preview/make-fixture-sample.mjs` (synthetic).
+# preview/fixture.js
+# preview/payload.json
+
+# Editor / OS noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Logs and dumps
+*.log
+*.tmp
+*.bak

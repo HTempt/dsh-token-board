@@ -1,0 +1,60 @@
+{
+  "name": "dsh-usage-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Token usage dashboard for the DSH web GUI: metric cards, a three-month daily heat calendar with token/call toggling, click-through day detail with provider breakdown, provider and model rankings, and a dual-metric trend chart.",
+  "icon": "icon.svg",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./usage": "./lib/usage.js",
+    "./package.json": "./package.json",
+    "./ledger": "./lib/ledger-merge.js"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/usage.js",
+    "lib/ledger-merge.js",
+    "lib/client.js",
+    "icon.svg",
+    "README.md"
+  ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "token-usage",
+    "dashboard",
+    "deepseek-harness"
+  ],
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-ui-sidebar"
+      ]
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh": ">=0.2.1-rc.2"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HTempt/dsh-usage-dashboard.git"
+  },
+  "homepage": "https://github.com/HTempt/dsh-usage-dashboard#readme",
+  "bugs": {
+    "url": "https://github.com/HTempt/dsh-usage-dashboard/issues"
+  },
+  "author": "HTempt"
+}
