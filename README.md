@@ -1,5 +1,7 @@
 # dsh-usage-dashboard
 
+> 全面了解 DeepSeek Harness 的 Token 消耗与调用情况。
+>
 > 给 [DeepSeek Harness](https://github.com/deepseek-ai) Web GUI 用的 Token 消耗统计插件：
 > 侧边栏加一行「使用统计」，中栏渲染完整看板——今日/本月/区间指标卡、
 > 三个月热力日历、点开某天的来源明细、提供商与模型排名、双指标趋势图。
