@@ -1,0 +1,10 @@
+# Keep text files LF in the repository regardless of the checkout platform.
+# The working tree on Windows may still be CRLF (core.autocrlf=true), but what
+# git stores -- and therefore what a Linux/macOS clone or an npm publish sees --
+# must be LF, or every doc edit shows up as a whole-file rewrite.
+* text=auto eol=lf
+
+# Binary assets must never be line-ending converted.
+*.woff2 binary
+*.png binary
+*.ico binary
