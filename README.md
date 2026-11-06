@@ -106,9 +106,27 @@ const inject = ["webServer", "sessionPersistence", "sessions"];
 浏览器半声明 `dsh.client.inject`：`dsh-client-locale`、`dsh-client-ui-layout`、
 `dsh-client-ui-sidebar`。
 
+### 支持哪些平台
+
+声明的是 `"dsh.client.platform": "web"`。DSH 的客户端加载器只认这一个值
+（`dsh-client-modules`：`decl.platform !== "web"` 就直接跳过），所以**只有带 Web GUI
+的运行方式才显示本插件的界面**。
+
+官方 profile 模板只有四个：`acp`、`web`、`headless`、`sdk`——**没有 `desktop`**。
+Desktop 若带图形界面，跑的就是 `web` profile，装到 `--profile web` 即可用；
+若跑 `headless` / `acp`，则没有浏览器界面，插件装了也不会出现在侧边栏
+（宿主半的统计与两个 HTTP 路由照常工作，数据可另行取用）。
+
+装之前可以这样确认目标 profile：
+
+```bash
+ls ~/.dsh/profiles/
+dsh --dump-config --profile <名字> | head -5
+```
+
 **可移植性**：`lib/` 里没有 `import` 任何 `@deepseek-ai/*` 包，只用 Node 内置模块。
 所以在没有 DSH 的环境里 `import('./lib/index.js')` 也能成功（只拿到 `name`/`inject`/
-`apply` 等导出，路由不会注册）；`lib/usage.js` 的 23 个纯函数可以脱离宿主单独使用或单测。
+`apply` 等导出，路由不会注册）；`lib/usage.js` 的纯函数可以脱离宿主单独使用或单测。
 
 ## 文档
 
@@ -276,10 +294,26 @@ const inject = ["webServer", "sessionPersistence", "sessions"];
 
 两者都是 `GET`，且只接受 loopback 对端（按 peer socket 判定，Host 头只作附加检查）。
 
-请求头 `x-dsh-usage-dashboard-tz-offset`：浏览器时区偏移，**东为正**，单位秒
-（客户端发 `-new Date().getTimezoneOffset() * 60`，UTC+8 → `28800`）。
+两个请求头一起发，宿主优先用前者：
 
-> 这是**故意不用** `getTimezoneOffset` 自身符号（它在东半球为负）的约定。
+| 请求头 | 含义 |
+|---|---|
+| `x-dsh-usage-dashboard-tz-name` | IANA 时区名（`Asia/Shanghai`、`America/New_York`），浏览器经 `Intl.DateTimeFormat().resolvedOptions().timeZone` 取得 |
+| `x-dsh-usage-dashboard-tz-offset` | 浏览器时区偏移，**东为正**，单位秒（`-new Date().getTimezoneOffset() * 60`，UTC+8 → `28800`） |
+
+**为什么需要时区名**：数字 offset 只是「此刻」的一个采样值。有夏令时（DST）的地区，
+同一台机器在冬夏报告不同 offset；若用打开页面那一刻的 offset 去折算整个窗口
+（最长 370 天，必然跨切换点），切换点另一侧约 1 小时的用量会被算到相邻日期上。
+
+有 zone 名时，宿主对**每个小时桶**按该时区的历史规则解析 offset（`lib/usage.js`
+的 `offsetMinutesAt` / `dayResolver`），跨 DST 也各归其日；zone 缺失或不认识时
+回落到 offset，行为与旧版一致。
+
+> **中国用户不受 DST 影响**：全境 UTC+8 且不实行夏令时，offset 全年恒定，
+> 单一 offset 就是真实值。受影响的只有北美/欧洲/澳洲等实行夏令时的地区。
+> `scripts/dst.mjs` 锁死这条：纽约夏季时刻用冬季 offset 也必须归到正确的那天。
+
+> offset 的符号是**故意不用** `getTimezoneOffset` 自身符号（它在东半球为负）。
 > 宿主曾把两者混用：按「东为负」去减 `28800`，于是东半球每个用户的窗口末日都
 > 退到**前一天**，今日那一行落在窗口外——「今日消耗」显示 0，本月卡也漏掉今天。
 > `scripts/timezone.mjs` 锁死这条行为（UTC+8 / UTC / UTC-5 各验一遍）。
@@ -308,11 +342,13 @@ const inject = ["webServer", "sessionPersistence", "sessions"];
 `node_modules`，无需先 `cd` 到 profile，也无需软链接）：
 
 ```bash
+node scripts/check-client.mjs  # 浏览器半：bundle id == 包名 == patch 名，apply 能注册座位
 node scripts/unit.mjs          # 纯折叠语义 5 项断言
 node scripts/singleledger.mjs  # live+persisted 只计一次
 node scripts/transition.mjs    # live→落盘→扫描 不变
 node scripts/migrate.mjs       # v3 缓存迁移不丢历史
 node scripts/timezone.mjs      # 窗口/本月跟随浏览器时区
+node scripts/dst.mjs           # 跨夏令时切换仍归到各自的本地日
 node scripts/smoke-host.mjs    # 真实库自洽 + 重复读一致
 node scripts/reconcile.mjs     # 与外部 CSV 导出逐日逐模型对账
 ```

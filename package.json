@@ -23,7 +23,8 @@
     "THIRD-PARTY.md",
     "LICENSE",
     "ORIGINALITY.md",
-    "scripts/check-client.mjs"
+    "scripts/check-client.mjs",
+    "scripts/dst.mjs"
   ],
   "keywords": [
     "dsh",
