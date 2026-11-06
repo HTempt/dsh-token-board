@@ -22,7 +22,8 @@
     "README.md",
     "THIRD-PARTY.md",
     "LICENSE",
-    "ORIGINALITY.md"
+    "ORIGINALITY.md",
+    "scripts/check-client.mjs"
   ],
   "keywords": [
     "dsh",

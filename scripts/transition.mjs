@@ -14,7 +14,16 @@
 import { join } from "node:path";
 import { dshHome, harness } from "./harness.mjs";
 
-const NOW = Date.UTC(2026, 10, 2, 10, 30, 0);
+// Anchor the fixture to TODAY, not a fixed date: the summary route only folds
+// the requested window (`days=2`), so a hardcoded instant silently drops out of
+// range a couple of days later and the assertion then fails at 0 tokens for a
+// reason that has nothing to do with the transition it is meant to prove.
+// 10:30 UTC is 18:30 at UTC+8, i.e. the same local day either way.
+const NOW = (() => {
+	const at = new Date();
+	at.setUTCHours(10, 30, 0, 0);
+	return at.getTime();
+})();
 const events = [
 	{ seq: 0, time: NOW, type: "request/header", data: { header: { config: { provider: "prov", model: "mod" } } } },
 	{ seq: 1, time: NOW, type: "assistant/chunk", data: { turn: 1, step: 1, chunk: { type: "usage", usage: { inputTokens: 1000, outputTokens: 100 } } } },

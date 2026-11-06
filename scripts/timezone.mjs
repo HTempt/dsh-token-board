@@ -89,10 +89,21 @@ for (const tzSeconds of [28800, 0, -18000]) {
 	check(`tz=${tzSeconds} month starts on the 1st`, payload.month?.from === monthFrom, `from=${payload.month?.from} expected=${monthFrom}`);
 }
 
-// The month card must also agree with the day rows it summarizes.
+// The month card summarizes the CURRENT calendar month (1st through month end),
+// which is a different span from `window` (the selected range). So the check is
+// not "month rows equal window rows" — the two cover different days on purpose.
+// What must hold is that every month row is a real day inside the month span,
+// and that the sample day the fixture wrote lands there.
 const payload = await summary(28800);
-const monthKeys = new Set((payload.month?.days ?? []).map((day) => day.date));
-check("month rows carry the day key the calendar uses", monthKeys.size === 0 || monthKeys.has(payload.days.at(-1)?.date ?? ""), [...monthKeys].join(","));
+const monthDays = payload.month?.days ?? [];
+const monthFrom = payload.month?.from ?? "";
+const monthTo = payload.month?.to ?? "";
+const outside = monthDays.filter((row) => row.date < monthFrom || row.date > monthTo).map((row) => row.date);
+check("month span covers a whole calendar month", monthFrom.endsWith("-01") && monthTo >= monthFrom, `${monthFrom} → ${monthTo}`);
+check("every month row falls inside the month span", outside.length === 0, outside.join(",") || "all inside");
+// The fixture's usage sits at 00:30 UTC on 2026-11-03, which is 08:30 on the
+// same day at UTC+8 — so it must be summarized under that month.
+check("month rows carry the sample's local day", monthDays.length === 0 || monthDays.some((row) => row.date === "2026-11-03"), monthDays.map((row) => row.date).join(","));
 
 if (failures > 0) {
 	console.log(`FAIL: ${failures} timezone assertion(s) failed`);

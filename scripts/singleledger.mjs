@@ -14,7 +14,15 @@
 import { join } from "node:path";
 import { dshHome, harness } from "./harness.mjs";
 
-const NOW = Date.UTC(2026, 10, 2, 10, 30, 0); // 18:30 local at UTC+8
+// Anchor to TODAY: the route only folds the `days=2` window, so a fixed instant
+// falls out of range and the day row disappears — a failure that looks like
+// double counting but is really an expired fixture.
+// 10:30 UTC is 18:30 at UTC+8, the same local day either way.
+const NOW = (() => {
+	const at = new Date();
+	at.setUTCHours(10, 30, 0, 0);
+	return at.getTime();
+})();
 /** Two used calls, each exactly one usage sample. */
 const events = [
 	{ seq: 0, time: NOW, type: "request/header", data: { header: { config: { provider: "prov", model: "mod" } } } },

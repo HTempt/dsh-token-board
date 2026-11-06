@@ -15,9 +15,14 @@ window.__MODULE_TABLE__ = {};
 	const modules = {};
 	const factories = {};
 	const cache = {};
+	// The bundle names itself (`id` in `__ModuleLoader__.load`), and that name
+	// changes whenever the package is renamed. Remembering it here means the
+	// harness never has to be told the name a second time.
+	const loadedIds = [];
 	window.__ModuleLoader__ = {
 		load(entry) {
 			factories[entry.id] = entry.factory;
+			loadedIds.push(entry.id);
 		},
 		require(id) {
 			return require(id);
@@ -65,7 +70,8 @@ window.__MODULE_TABLE__ = {};
 		// the parent directory for it to load.
 			script.src = "../lib/client.js";
 			script.onload = () => {
-				const factory = factories["dsh-usage-dashboard"];
+				const id = loadedIds[loadedIds.length - 1];
+				const factory = id === undefined ? undefined : factories[id];
 				if (factory === undefined) {
 					reject(new Error("client bundle did not register its factory"));
 					return;

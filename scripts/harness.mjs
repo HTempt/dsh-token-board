@@ -11,7 +11,7 @@
  *   2. the global `dsh` CLI installation's `node_modules`, which is where a
  *      global install keeps the harness packages.
  *
- * @module dsh-usage-dashboard/scripts/harness
+ * @module dsh-token-board/scripts/harness
  */
 import { homedir } from "node:os";
 import { join } from "node:path";

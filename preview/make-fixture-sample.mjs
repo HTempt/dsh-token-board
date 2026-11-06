@@ -12,7 +12,7 @@
  *
  *   node preview/make-fixture-sample.mjs
  *
- * @module dsh-usage-dashboard/preview/make-fixture-sample
+ * @module dsh-token-board/preview/make-fixture-sample
  */
 import { writeFileSync } from "node:fs";
 
@@ -239,10 +239,17 @@ const unattributed = { name: "（未归属）", tokens: Math.round(windowTotals.
 const monthFrom = `${days.at(-1).date.slice(0, 7)}-01`;
 const monthDays = days.filter((day) => day.date >= monthFrom);
 
+// The client reads `payload.month.totals` for the "this month" card, not the
+// `days` array, so a fixture without `totals` renders a permanent 0 there. The
+// real host builds it at index.js (`month.totals`), so mirror that shape.
+const monthTotals = zero();
+for (const day of monthDays) addInto(monthTotals, day);
+settle(monthTotals);
+
 const payload = {
 	ok: true,
 	window: { from: days[0].date, to: days.at(-1).date, days: days.length, explicit: false },
-	month: { from: monthFrom, to: days.at(-1).date, days: monthDays.map((day) => ({ date: day.date, tokens: day.tokens, calls: day.calls, failedCalls: day.failedCalls, attempts: day.attempts, successRate: day.successRate, inputTokens: day.inputTokens, outputTokens: day.outputTokens, cacheReadTokens: day.cacheReadTokens, cacheWriteTokens: day.cacheWriteTokens, reasoningTokens: day.reasoningTokens, cacheHitRate: day.cacheHitRate, byProvider: day.byProvider, byModel: day.byModel })) },
+	month: { from: monthFrom, to: days.at(-1).date, days: monthDays.map((day) => ({ date: day.date, tokens: day.tokens, calls: day.calls, failedCalls: day.failedCalls, attempts: day.attempts, successRate: day.successRate, inputTokens: day.inputTokens, outputTokens: day.outputTokens, cacheReadTokens: day.cacheReadTokens, cacheWriteTokens: day.cacheWriteTokens, reasoningTokens: day.reasoningTokens, cacheHitRate: day.cacheHitRate, byProvider: day.byProvider, byModel: day.byModel })), totals: monthTotals },
 	windowTotals,
 	allTime: { totals: allTime },
 	providers: [...providerTotals.values()].map(settle).sort((a, b) => b.tokens - a.tokens),

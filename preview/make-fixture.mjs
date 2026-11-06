@@ -21,7 +21,7 @@
  *   node preview/make-fixture.mjs                              # refuses
  *   DSH_FIXTURE_ALLOW_PRIVATE=1 node preview/make-fixture.mjs  # local only
  *
- * @module dsh-usage-dashboard/preview/make-fixture
+ * @module dsh-token-board/preview/make-fixture
  */
 import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
