@@ -1,6 +1,6 @@
 # dsh-token-board
 
-为 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Web GUI 提供 Token 用量看板的插件，`dsh web` 与 [DSH Desktop](https://dshdesktop.com/) 都能用：它把本机会话日志折叠成日/提供商/模型三个维度的统计，在侧边栏加一个「使用统计」入口，并渲染今日、本月与所选区间的消耗卡片、可切 3/6/12 个月或「全部」的热力日历、点开某天查看按来源拆分的明细、提供商与模型排行，以及 Token 与调用次数的双轴趋势图；全部数据只来自本机、不联网不上报，插件也只写自己的统计与缓存文件。
+为 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Web GUI 提供 Token 用量看板的插件，`dsh web` 与 `DSH Desktop` 都能用：它把本机会话日志折叠成日/提供商/模型三个维度的统计，在侧边栏加一个「使用统计」入口，并渲染今日、本月与所选区间的消耗卡片、可切 3/6/12 个月或「全部」的热力日历、点开某天查看按来源拆分的明细、提供商与模型排行，以及 Token 与调用次数的双轴趋势图；全部数据只来自本机、不联网不上报，插件也只写自己的统计与缓存文件。
 
 [![npm](https://img.shields.io/npm/v/dsh-token-board?color=cb3837)](https://www.npmjs.com/package/dsh-token-board)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -27,7 +27,7 @@
 dsh plugin --profile web add "dsh-token-board"
 ```
 
-> 从 [npm](https://www.npmjs.com/package/dsh-token-board) 安装，当前版本 `0.1.0`。
+> 从 npm 安装，当前版本 `0.1.1`。
 
 升级到最新发布版本：
 
@@ -43,8 +43,8 @@ dsh plugin --profile web remove "dsh-token-board"
 
 装完**重启对应的 DSH Host**（只刷新浏览器窗口不会加载新的服务端插件），然后 Ctrl+F5。
 
-> **关于 DSH Desktop（[dshdesktop.com](https://dshdesktop.com/)）**：那是 Dataelem
-> 团队的第三方桌面客户端（`github.com/dataelement/dsh-desktop`，MIT），**不是
+> **关于 DSH Desktop**：那是 Dataelem 团队的第三方桌面客户端
+> （dshdesktop.com，`github.com/dataelement/dsh-desktop`，MIT），**不是
 > DeepSeek 官方产品**。它把 Harness 打包成 Electron 应用，依赖里含
 > `@deepseek-ai/dsh-web-app`——跑的就是 **`web` profile**，没有独立的 `desktop`
 > profile，也**没有** `dsh desktop` 这个命令。
@@ -67,7 +67,7 @@ dsh plugin --profile web remove "dsh-token-board"
 锁定到某个版本（避免跟随 `latest` 变化）：
 
 ```bash
-dsh plugin --profile web add "dsh-token-board@0.1.0"
+dsh plugin --profile web add "dsh-token-board@0.1.1"
 ```
 
 ### 若 npm 上还没有这个版本
@@ -87,8 +87,8 @@ dsh plugin --profile web add "github:HTempt/dsh-token-board#<commit-sha>"
 ### 装完应该看到什么
 
 ```bash
-dsh --dump-config --profile web | grep -A1 usage-dashboard
-# - id: usage-dashboard
+dsh --dump-config --profile web | grep -A1 dsh-token-board
+# - id: dsh-token-board
 #   name: 'dsh-token-board'      ← 全树恰好出现 1 次
 ```
 
@@ -103,9 +103,9 @@ dsh --dump-config --profile web | grep -A1 usage-dashboard
 
 ```bash
 git clone https://github.com/HTempt/dsh-token-board.git \
-  ~/.dsh/profiles/web/local-plugins/dsh-usage-dashboard
+  ~/.dsh/profiles/web/local-plugins/dsh-token-board
 cd ~/.dsh/profiles/web
-dsh plugin --profile web add "link:./local-plugins/dsh-usage-dashboard"
+dsh plugin --profile web add "link:./local-plugins/dsh-token-board"
 ```
 
 ## 它需要宿主提供什么
@@ -383,7 +383,7 @@ inject）与 `dsh-client-locale`、`dsh-client-ui-layout`、`dsh-client-ui-sideb
 
 - **注册点只有一个**：`dsh.profile.bundles`。行本身由本包自带的
   `cordis.patch.yml`（`dsh.bundle.patch`）插入
-  `- id: usage-dashboard / name: dsh-token-board`。不要在 profile 自己的
+  `- id: dsh-token-board / name: dsh-token-board`。不要在 profile 自己的
   `cordis.patch.yml` 里再写一遍。
 - **`cordis.patch.yml` 必须在发布内容里**：它同时出现在 `package.json` 的
   `files` 数组里。漏掉它的后果不是「少一个文件」而是**插件装不上**——
@@ -467,7 +467,7 @@ node preview/verify-single-source.mjs   # 无头校验：页面渲染成功且�
 这个插件**只有一份源码**，就是它自己所在的目录：
 
 ```
-~/.dsh/profiles/web/local-plugins/dsh-usage-dashboard/   ← 唯一源码，宿主直接加载
+~/.dsh/profiles/web/local-plugins/dsh-token-board/   ← 唯一源码，宿主直接加载
 ```
 
 profile 的 `package.json` 用 `link:` 指向它，`node_modules/dsh-token-board`
@@ -487,3 +487,17 @@ profile 的 `package.json` 用 `link:` 指向它，`node_modules/dsh-token-board
 注意**运行时数据**不在这个目录里，别混进备份：`~/.dsh/dsh-usage-dashboard/`
 （`statistics.json`）和 `~/.dsh/storages/usage-dashboard-*.json` 都是数据，删掉会
 按会话日志重建（慢，但不丢历史）。
+
+### 哪些名字叫 dsh-token-board，哪些不叫
+
+包名、Loader 行 id、侧边栏面板 id、DOM 标记、locale 命名空间全部统一为
+**`dsh-token-board`**。下面这些保留旧词，是有意为之：
+
+| 名字 | 为什么不改 |
+|---|---|
+| `~/.dsh/dsh-usage-dashboard/`（`DATA_DIR`） | 磁盘上已存在的统计目录，改名会让既有历史读不到 |
+| `usage-dashboard-cache.json` / `usage-dashboard-digests.json` | 同上，是可重建缓存与校验摘要的文件名 |
+| `/api/usage-dashboard/summary`、`/day` | HTTP 路由，改动会破坏已缓存的客户端 |
+| `x-dsh-usage-dashboard-tz-*` 请求头 | 浏览器与宿主之间的内部协议，成对出现即可，不对外 |
+
+这些都不面向用户，且改动会带来数据或兼容代价，因此只统一了"读者会看到"的那些。

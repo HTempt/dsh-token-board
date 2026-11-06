@@ -72,7 +72,7 @@ try {
 	const state = await send("Runtime.evaluate", { expression: `(() => ({
 		ready: window.__PREVIEW_READY__ === true,
 		mountText: (document.getElementById('mount')?.textContent ?? '').slice(0, 120),
-		hasRoot: document.querySelector('[data-dsh-usage-dashboard-view]') !== null,
+		hasRoot: document.querySelector('[data-dsh-token-board-view]') !== null,
 		hasPage: document.querySelector('.udw_page') !== null,
 		cells: document.querySelectorAll('.udw_cell').length
 	}))()`, returnByValue: true });

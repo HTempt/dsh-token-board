@@ -1,7 +1,12 @@
-# dsh-usage-dashboard bundle patch: inserts the dual-face plugin row into the
+# dsh-token-board bundle patch: inserts the dual-face plugin row into the
 # web profile roster. The node half (exports ".") serves the aggregate endpoints
 # from the host process; the `dsh.client` declaration in package.json makes the
 # browser half (exports "./client") load in the web GUI.
+#
+# The row id is the identity other patches address this entry by, so it is kept
+# equal to the package name: a reader comparing package.json, this file and a
+# profile dump then sees one name throughout. It is NOT the module specifier --
+# `name` is -- so the two are separate fields even though they now match.
 - insert:
-    - id: usage-dashboard
+    - id: dsh-token-board
       name: 'dsh-token-board'
