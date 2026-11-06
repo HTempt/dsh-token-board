@@ -37,6 +37,27 @@ dsh plugin --profile web add "dsh-token-board"
 dsh plugin --profile web add "dsh-token-board@latest"
 ```
 
+> **装到了旧版本？** pnpm 会把 registry 的元数据（含 `dist-tags`）缓存在本地
+> `pnpm-cache/*/metadata/` 下。新版本发布后，缓存里的 `latest` 仍指向旧版本，
+> 于是 `add dsh-token-board` 和 `add dsh-token-board@latest` 都会装旧版——
+> **`@latest` 并不能绕过这个缓存**。
+>
+> 两个办法（任选）：
+>
+> ```bash
+> # 1. 指定精确版本，不查 dist-tags，不受缓存影响
+> dsh plugin --profile web add "dsh-token-board@0.1.3"
+>
+> # 2. 删掉该包的元数据缓存再装
+> rm -f ~/AppData/Local/pnpm-cache/v11/metadata/*/dsh-token-board.jsonl   # Windows 路径同理
+> ```
+>
+> 安装后可用下面的命令确认实际版本，不要只看命令输出：
+>
+> ```bash
+> node -e "console.log(require('./node_modules/dsh-token-board/package.json').version)"
+> ```
+
 卸载：
 
 ```bash
