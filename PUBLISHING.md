@@ -41,23 +41,17 @@ remove                                          → bundles 与 dependencies 双
 
 ## 为什么叫这个名字
 
-原计划用 `dsh-usage-dashboard`，但 npm 上该名称已被其他发布者注册。相近的候选名
-也大多名花有主（此处不点名具体归属，只记状态），最终选定 `dsh-token-board`：
+早期计划使用的名字在 npm 上已被注册，因此改用当前这个未被占用的裸名。
 
-| 候选名 | npm 状态 |
-|---|---|
-| `dsh-usage-dashboard` | ❌ 已被其他发布者注册 |
-| `dsh-usage-board` | ❌ 已被其他发布者注册 |
-| `dsh-token-dashboard` | ❌ 已被其他发布者注册 |
-| `dsh-usage-panel` / `dsh-token-meter` | ❌ 已被其他发布者注册 |
-| **`dsh-token-board`** | ✅ 可用，发布即为本包 |
-| `dsh-token-view` / `dsh-token-lens` / `dsh-tokendash` / `dsh-usage-kit` | ✅ 备选（未采用） |
+选名方法（可复现）：
 
-查询方式：`curl -s -o /dev/null -w "%{http_code}" https://registry.npmjs.org/<name>`
-（`404` = 未注册可用，`200` = 已被占用）。
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" https://registry.npmjs.org/<name>
+# 404 = 未注册可用，200 = 已被占用
+```
 
-> 本节只记录命名过程与可用性检测方法，**不评价、不比较任何其他包**。名称相近
-> 不代表功能或来源相关，第三方包与本案各自独立。
+最终选定的 **`dsh-token-board`** 当时返回 404，发布后即为本包。命名只做了可用性
+检测，不涉及任何其他包的功能或来源比较。
 
 ## 发布前已完成的准备
 
@@ -181,8 +175,6 @@ dsh plugin --profile web add dsh-token-board@latest
 
 ## 已知的坑
 
-- **只认 `dsh-token-board`**：npm 上若干相近名称已被其他发布者注册（与本项目无关），
-  不要按相似名字安装。
 - **`private: true` 会阻止发布**：报 `This package has been marked as private
   and cannot be published`。已删除，别加回来。
 - **`files[]` 必须含 `cordis.patch.yml`**：少了它包能发布但**装不上**，

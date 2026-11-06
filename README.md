@@ -59,11 +59,6 @@ dsh plugin --profile web add "github:HTempt/dsh-usage-dashboard"
 dsh plugin --profile web add "github:HTempt/dsh-usage-dashboard#<commit-sha>"
 ```
 
-> **注意包名**：本项目**只以 `dsh-token-board` 发布**。npm 上若干相近名称
-> （如 `dsh-usage-dashboard`、`dsh-usage-board`、`dsh-token-dashboard`）
-> 已被其他发布者注册，均为各自独立、与本项目无关的包。安装时请认准
-> `dsh-token-board`，不要按相似名字去装。
-
 > **若从 git 安装时报 `allowBuilds` 相关错误**：pnpm 默认阻止 git 依赖执行
 > `prepare` 脚本。本包没有 `prepare` 脚本，正常情况下不会触发；万一被拦，按 pnpm
 > 打印的键名把它加进 profile 的 `pnpm-workspace.yaml` → `allowBuilds` 后重跑。
