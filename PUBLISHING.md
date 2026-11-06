@@ -152,6 +152,17 @@ git status                 # 应为 clean，且已推送
 npm pack --dry-run         # 应为 17 个文件（0.1.4 起），且含 cordis.patch.yml
 ```
 
+**版本号要同步到 README（每次发版都要做）**：README 是 GitHub 首页，也是 npm 页面的正文，
+里面「当前版本」和四条安装示例都写死了版本号，只改 `package.json` 会让首页说明停在旧版本
+（0.1.4 发布时就发生过：registry 上已经是 0.1.4，README 还写着 0.1.3）。发版前跑：
+
+```bash
+grep -n "0\.1\.[0-9]" README.md        # 除历史叙述外，应全部是新版本号
+```
+
+`README.md:539` 那句 `^0.1.3` 是故障复盘里的历史事实，**不要改**；`PUBLISHING.md` 里的
+`0.1.0` / `0.0.0-stage` 同理是发布记录。
+
 **关键自检**：输出里必须能看到 `cordis.patch.yml`。之前 `files[]` 漏了它，
 安装时 `dsh plugin add` 直接报
 `failed to read overlay .../cordis.patch.yml` 并回滚整个安装。
