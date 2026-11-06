@@ -115,6 +115,12 @@ if (lastDay !== undefined) {
 	check("provider rows sum to day calls", callSum === day.calls);
 	const windowSum = payload.days.reduce((sum, entry) => sum + entry.tokens, 0);
 	check("day rows sum to window tokens", windowSum === payload.windowTotals.tokens);
+	// The day dialog's workspace rows: present on every day (an empty list is a
+	// fact, not a missing field), never larger than the day they belong to — the
+	// archive-only remainder is intentionally not attributed — and sorted.
+	check("every day carries a workspace list", payload.days.every((entry) => Array.isArray(entry.byWorkspace)));
+	check("workspace rows never exceed their day", payload.days.every((entry) => entry.byWorkspace.reduce((sum, row) => sum + row.tokens, 0) <= entry.tokens));
+	check("workspace rows are sorted by tokens", payload.days.every((entry) => entry.byWorkspace.every((row, index, list) => index === 0 || list[index - 1].tokens >= row.tokens)));
 }
 
 const t1 = Date.now();
