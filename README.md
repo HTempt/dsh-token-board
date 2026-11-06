@@ -1,6 +1,6 @@
-# dsh-usage-dashboard
+# dsh-token-board
 
-为 [DeepSeek Harness](https://github.com/deepseek-ai) 网页端（`dsh web`）提供 Token 用量看板的插件：它把本机会话日志折叠成日/提供商/模型三个维度的统计，在侧边栏加一个「使用统计」入口，并渲染今日、本月与所选区间的消耗卡片、3/6/12 个月热力日历、点开某天查看按来源拆分的明细（含缓存命中率）、提供商与模型排行，以及 Token 与调用次数的双轴趋势图；全部数据只来自本机、不联网不上报，插件也只写自己的统计与缓存文件。
+为 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Web GUI 提供 Token 用量看板的插件，`dsh web` 与 [DSH Desktop](https://dshdesktop.com/) 都能用：它把本机会话日志折叠成日/提供商/模型三个维度的统计，在侧边栏加一个「使用统计」入口，并渲染今日、本月与所选区间的消耗卡片、3/6/12 个月热力日历、点开某天查看按来源拆分的明细、提供商与模型排行，以及 Token 与调用次数的双轴趋势图；全部数据只来自本机、不联网不上报，插件也只写自己的统计与缓存文件。
 
 [![npm](https://img.shields.io/npm/v/dsh-token-board?color=cb3837)](https://www.npmjs.com/package/dsh-token-board)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -41,8 +41,28 @@ dsh plugin --profile web add "dsh-token-board@latest"
 dsh plugin --profile web remove "dsh-token-board"
 ```
 
-Desktop 用户把 `--profile web` 换成 `--profile desktop`。装完**重启对应的 DSH Host**
-（只刷新浏览器窗口不会加载新的服务端插件），然后 Ctrl+F5。
+装完**重启对应的 DSH Host**（只刷新浏览器窗口不会加载新的服务端插件），然后 Ctrl+F5。
+
+> **关于 DSH Desktop（[dshdesktop.com](https://dshdesktop.com/)）**：那是 Dataelem
+> 团队的第三方桌面客户端（`github.com/dataelement/dsh-desktop`，MIT），**不是
+> DeepSeek 官方产品**。它把 Harness 打包成 Electron 应用，依赖里含
+> `@deepseek-ai/dsh-web-app`——跑的就是 **`web` profile**，没有独立的 `desktop`
+> profile，也**没有** `dsh desktop` 这个命令。
+>
+> 在 Desktop 里有两条装法：
+>
+> 1. **应用内插件市场**（推荐）：走 Desktop 自带的插件管理界面安装，不需要知道
+>    目录在哪。
+> 2. **命令行**：Desktop 的 profiles 放在 Electron 的 per-user 应用数据目录下
+>    （官方文档原话，具体路径随平台/版本而变），**不是** `~/.dsh`。若用全局
+>    `dsh` 命令，必须先把 `DSH_HOME` 指到那个目录，否则会装进一个 Desktop 根本
+>    不加载的 profile 里。装前先确认：
+>
+>    ```bash
+>    dsh --dump-config --profile web | head -5    # 确认这是 Desktop 在读的 profile
+>    ```
+>
+> 装完在应用里**完全退出再重新打开**（等效重启 Host），不要只关窗口。
 
 锁定到某个版本（避免跟随 `latest` 变化）：
 
@@ -55,8 +75,8 @@ dsh plugin --profile web add "dsh-token-board@0.1.0"
 也可以直接从本仓库对应提交安装，内容与 npm 包一致：
 
 ```bash
-dsh plugin --profile web add "github:HTempt/dsh-usage-dashboard"
-dsh plugin --profile web add "github:HTempt/dsh-usage-dashboard#<commit-sha>"
+dsh plugin --profile web add "github:HTempt/dsh-token-board"
+dsh plugin --profile web add "github:HTempt/dsh-token-board#<commit-sha>"
 ```
 
 > **若从 git 安装时报 `allowBuilds` 相关错误**：pnpm 默认阻止 git 依赖执行
@@ -82,7 +102,7 @@ dsh --dump-config --profile web | grep -A1 usage-dashboard
 ### 手动安装（离线 / 开发）
 
 ```bash
-git clone https://github.com/HTempt/dsh-usage-dashboard.git \
+git clone https://github.com/HTempt/dsh-token-board.git \
   ~/.dsh/profiles/web/local-plugins/dsh-usage-dashboard
 cd ~/.dsh/profiles/web
 dsh plugin --profile web add "link:./local-plugins/dsh-usage-dashboard"
@@ -108,14 +128,23 @@ const inject = ["webServer", "sessionPersistence", "sessions"];
 
 ### 支持哪些平台
 
-声明的是 `"dsh.client.platform": "web"`。DSH 的客户端加载器只认这一个值
-（`dsh-client-modules`：`decl.platform !== "web"` 就直接跳过），所以**只有带 Web GUI
-的运行方式才显示本插件的界面**。
+界面的准入条件只有一个：宿主必须提供 **Web GUI**（浏览器半声明
+`"dsh.client.platform": "web"`，DSH 的客户端加载器只认这个值，
+`dsh-client-modules` 里 `decl.platform !== "web"` 就直接跳过）。
 
-官方 profile 模板只有四个：`acp`、`web`、`headless`、`sdk`——**没有 `desktop`**。
-Desktop 若带图形界面，跑的就是 `web` profile，装到 `--profile web` 即可用；
-若跑 `headless` / `acp`，则没有浏览器界面，插件装了也不会出现在侧边栏
-（宿主半的统计与两个 HTTP 路由照常工作，数据可另行取用）。
+所以「能不能用」取决于**运行方式**，而不是产品名字：
+
+| 运行方式 | profile | 界面可用 | 说明 |
+|---|---|---|---|
+| `dsh web`（浏览器） | `web` | ✅ | 标准用法 |
+| **DSH Desktop**（dshdesktop.com，第三方） | `web` | ✅ | Electron 包壳，内部启动的就是 `web` profile |
+| `headless` | `headless` | ❌ | 无 GUI；宿主半统计与两个路由照常工作 |
+| `acp` 客户端集成 | `acp` | ❌ | 同上 |
+
+**没有 `desktop` 这个 profile。** 官方 profile 模板只有 `web`、`headless`、`acp`、
+`sdk`、`sdk-minimal`；DSH Desktop 的依赖里含 `@deepseek-ai/dsh-web-app` 与
+`dsh-web-frontend`，证实它跑的就是 `web` profile。因此 Desktop 用户同样执行
+`--profile web`。
 
 装之前可以这样确认目标 profile：
 
@@ -123,6 +152,13 @@ Desktop 若带图形界面，跑的就是 `web` profile，装到 `--profile web`
 ls ~/.dsh/profiles/
 dsh --dump-config --profile <名字> | head -5
 ```
+
+**在 Desktop 里的可行性**已逐项核对（以 `dsh-desktop@0.12.1` 为例）：它依赖的
+`dsh-host-webserver`、`dsh-session-persistence-jsonl`、`dsh-session`（宿主半的三个
+inject）与 `dsh-client-locale`、`dsh-client-ui-layout`、`dsh-client-ui-sidebar`
+（浏览器半的三个 inject）都在，且其内置 DSH 为 `0.2.2-alpha.2`，满足本包
+`peerDependencies` 的 `>=0.2.1-rc.2`。Desktop 还提供「安全模式」——
+第三方插件若影响启动可临时禁用，本插件出问题时也能这样排查。
 
 **可移植性**：`lib/` 里没有 `import` 任何 `@deepseek-ai/*` 包，只用 Node 内置模块。
 所以在没有 DSH 的环境里 `import('./lib/index.js')` 也能成功（只拿到 `name`/`inject`/
@@ -149,12 +185,12 @@ dsh --dump-config --profile <名字> | head -5
 |---|---|
 | 顶部指标卡 | 五张：今日消耗、**本月消耗**、所选范围消耗、累计消耗、调用次数。脚注一律写清该卡覆盖的时段与调用数，范围卡直接写区间名（「近 3 月」「近 1 年」或自选起止） |
 | 每日热力图 | 每行 6 列；随区间显示 3/6/12 个月（1 年 = 2 行），每月从 1 号开始、不显示上月日期；单色深浅编码 Token 消耗 |
-| 日期详情 | **点日历某天弹出对话框**：标题只有日期（不再有「日期详情」）；当日 Token 拆分、调用次数、各来源明细与**缓存命中率**（不显示占比百分比） |
+| 日期详情 | **点日历某天弹出对话框**，标题只有日期；当日 Token 拆分、调用次数、各来源明细与缓存命中率 |
 | 提供商分布 | 环形图 + 占比条（仅「按提供商」页签） |
 | 模型排名 | 按 Token 排名（仅「按模型」页签） |
 | 双指标趋势 | Token 与调用次数各用一条独立纵轴，可 hover 查看某天 |
 | 顶部导航 | 概览 / 按提供商 / 按模型 |
-| 时间范围 | 近 3 月 / 近 6 月 / 近 1 年 / **自选起止日期**（最长 1 年，超出自动截断） |
+| 时间范围 | 近 3 月 / 近 6 月 / 近 1 年 / 全部 / **自选起止日期**（自选最长 1 年，超出自动截断） |
 
 ### 指标卡的两个约定
 
@@ -176,14 +212,13 @@ dsh --dump-config --profile <名字> | head -5
   `assistant/attempt`（未产出可见消息）计 1 次失败，`llm/retry` 只计重试次数、
   不重复计调用。因此页面上能同时给出成功率与失败数。
 - 全零 usage 的预热请求不计入。
-- 热力图只编码 Token 消耗（调用次数的切换已移除）。
+- 热力图只编码 Token 消耗。
 
 ## 交互约定
 
 - 时间范围与页签**永不因加载而禁用**：新的选择只是开始一次新读取并取消上一次，
   所以连点、来回切换都能立刻响应。
-- 刷新返回相同内容时**保留原 payload 对象**，页面不再每 3 秒无谓重渲染
-  （这正是此前点击被吞掉的原因）。
+- 刷新返回相同内容时**保留原 payload 对象**，避免每 3 秒无谓重渲染而吞掉点击。
 - 自选区间是一个小浮层（非模态），边看日历边选日期；开始/结束双向约束，
   超过 365 天给出提示并由宿主截断。
 
@@ -200,6 +235,27 @@ dsh --dump-config --profile <名字> | head -5
 | **热启动** | 启动时从缓存恢复 | 首读 ~21ms，之后 **~10ms** |
 | **实时增量** | 新会话、或日志被追加 | 只折受影响的会话 |
 | **定期枚举** | 每 3 分钟（或手动刷新） | `list()` 一次；**字节数不变则不重读** |
+
+### 插件没运行时产生的用量，会被统计到吗
+
+**会，而且只计一次。** 这一点值得单独说明，因为它看起来像"需要实时录制"，
+实际并不需要：
+
+- 本插件**不录制**任何东西。所有数字都从持久化的会话日志反推，而发现新日志靠的是
+  **枚举**（`list()`），不是实时监听事件。
+- 因此插件停用期间（或 DSH 本身没开）产生的会话，对下一次枚举来说只是"**还没折过的
+  存储日志**"。启动后第一次走查会把它折进来，**无论它多久以前**——不存在"错过就永久
+  丢失"的时间窗。
+- 已经被折过的会话如果之后又被追加（插件空闲期间继续聊），其 `revision` / `sizeBytes`
+  变了，下次枚举会**重读并替换**，不会既留旧值又加新值。
+- 反过来，会话被删除后它的折叠也会被移除，不会继续贡献已经不存在的用量。
+
+`scripts/offline-backfill.mjs` 锁死这三条：先写日志再启动插件（全量补统计）、
+空闲期间日志增长（重读且不重复计）、会话被删（停止计数）。
+
+> **真正的边界在磁盘，不在时间。** 只要会话日志还在 `ctx.sessionPersistence` 里，
+> 多久之前都能补算；日志本身被 DSH 压缩/清理掉之后才无法重算——而那部分只要
+> 曾经折过一次，就已经写入 `statistics.json` 归档，仍然保留。
 
 ### 一个会话只有一份折叠（单账本）
 
@@ -349,11 +405,12 @@ node scripts/transition.mjs    # live→落盘→扫描 不变
 node scripts/migrate.mjs       # v3 缓存迁移不丢历史
 node scripts/timezone.mjs      # 窗口/本月跟随浏览器时区
 node scripts/dst.mjs           # 跨夏令时切换仍归到各自的本地日
+node scripts/offline-backfill.mjs  # 插件未运行期间的用量，启动后补统计
 node scripts/smoke-host.mjs    # 真实库自洽 + 重复读一致
 node scripts/reconcile.mjs     # 与外部 CSV 导出逐日逐模型对账
 ```
 
-`reconcile.mjs` 是这次修复的验收：它用真实日志跑本插件，再拿
+`reconcile.mjs` 用真实日志跑本插件，再拿外部 CSV 导出
 `/api/usage-stats/export/daily.csv` 逐日逐模型比。只有「今天」允许有偏差
 （会话仍在写入，报为 `DRIFT-TODAY`），其他任何一天不一致都会以非零退出。
 实测结果：窗口内 70 天，**70 天全部相等**。
@@ -398,9 +455,9 @@ node preview/verify-single-source.mjs   # 无头校验：页面渲染成功且�
 - 页面有三个页签：概览 / 按提供商 / 按模型，每个页签是独立视图，无重复卡片：
   概览 = 日历 + 趋势；按提供商 = 提供商分布；按模型 = 模型排名。
 - 日期详情是模态对话框（Esc / 点遮罩 / 关闭按钮均可关闭，Tab 焦点锁定在框内），
-  不再占用日历右侧的常驻栏位。标题只有日期，内容为当日拆分 + 各来源（含缓存命中率）。
-- 日期详情里来源行的进度条仍表示相对大小，但**不再显示占比数字**：那是条的重复表达，
-  而缓存命中率才是条无法表达、且最能解释"看着便宜"的那项信息。
+  标题只有日期，内容为当日拆分 + 各来源（含缓存命中率）。
+- 日期详情里来源行的进度条表示相对大小，另给出缓存命中率——占比数字与条重复，
+  而缓存命中率是条无法表达的信息。
 
 ## 只有一个源码目录（别再复制第二份）
 
@@ -410,11 +467,11 @@ node preview/verify-single-source.mjs   # 无头校验：页面渲染成功且�
 ~/.dsh/profiles/web/local-plugins/dsh-usage-dashboard/   ← 唯一源码，宿主直接加载
 ```
 
-profile 的 `package.json` 用 `link:` 指向它，`node_modules/dsh-usage-dashboard`
+profile 的 `package.json` 用 `link:` 指向它，`node_modules/dsh-token-board`
 是指向同一位置的符号链接，所以编辑这里就等于编辑线上代码，**不需要**同步。
 
-`~/.dsh/local-plugins/` 曾经被当成「编辑用的源」，那份目录已经不存在（现在是空的）。
-不要在那里再复制一份：两份副本正是过去「改了没生效、重启后今日仍是 0」的来源。
+不要在 `~/.dsh/local-plugins/` 再复制一份：两份副本会让「改了没生效」这类问题
+重新出现。
 
 改完的生效范围不同：
 
