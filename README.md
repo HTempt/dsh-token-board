@@ -43,7 +43,7 @@ dsh plugin --profile web remove "dsh-token-board"
 
 装完**重启对应的 DSH Host**（只刷新浏览器窗口不会加载新的服务端插件），然后 Ctrl+F5。
 
-> **关于 DSH Desktop**：那是 Dataelem 团队的第三方桌面客户端
+> **关于 `DSH Desktop`**：那是 Dataelem 团队的第三方桌面客户端
 > （dshdesktop.com，`github.com/dataelement/dsh-desktop`，MIT），**不是
 > DeepSeek 官方产品**。它把 Harness 打包成 Electron 应用，依赖里含
 > `@deepseek-ai/dsh-web-app`——跑的就是 **`web` profile**，没有独立的 `desktop`
@@ -134,11 +134,11 @@ DSH 的客户端加载器只认这个值）。下列两种运行方式都提供 
 | 运行方式 | profile | 说明 |
 |---|---|---|
 | `dsh web`（浏览器） | `web` | 标准用法 |
-| **DSH Desktop**（dshdesktop.com） | `web` | Electron 桌面客户端，内部启动的就是 `web` profile |
+| `DSH Desktop`（桌面客户端） | `web` | 内部启动的就是 `web` profile |
 
 **两者用的是同一个 profile**，所以安装命令一致：`--profile web`。
 
-**关于 DSH Desktop**：它是 Dataelem 团队的第三方客户端
+**关于 `DSH Desktop`**：它是 Dataelem 团队的第三方客户端
 （`github.com/dataelement/dsh-desktop`，MIT），**不是 DeepSeek 官方产品**。
 官方 profile 模板里没有 `desktop` 这一项，也**没有** `dsh desktop` 命令。
 
