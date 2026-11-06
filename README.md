@@ -6,6 +6,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%5E22.19%20%7C%7C%20%3E%3D24-brightgreen)](package.json)
 
+![dsh-token-board 概览：五张指标卡、可切区间的热力日历与双指标趋势](docs/images/overview.png)
+
 ---
 
 ## 它能回答什么
@@ -27,7 +29,7 @@
 dsh plugin --profile web add "dsh-token-board"
 ```
 
-> 从 npm 安装，当前版本 `0.1.1`。
+> 从 npm 安装，当前版本 `0.1.3`。
 
 升级到最新发布版本：
 
@@ -67,7 +69,7 @@ dsh plugin --profile web remove "dsh-token-board"
 锁定到某个版本（避免跟随 `latest` 变化）：
 
 ```bash
-dsh plugin --profile web add "dsh-token-board@0.1.1"
+dsh plugin --profile web add "dsh-token-board@0.1.3"
 ```
 
 ### 若 npm 上还没有这个版本
@@ -83,6 +85,23 @@ dsh plugin --profile web add "github:HTempt/dsh-token-board#<commit-sha>"
 > `prepare` 脚本。本包没有 `prepare` 脚本，正常情况下不会触发；万一被拦，按 pnpm
 > 打印的键名把它加进 profile 的 `pnpm-workspace.yaml` → `allowBuilds` 后重跑。
 > 从 npm 安装不会遇到这个问题。
+
+### 从 GitHub Release 下载安装包
+
+每个版本都在 [Releases](https://github.com/HTempt/dsh-token-board/releases) 附带
+构建好的 `.tgz`，内容与 npm 上完全一致。适合离线环境或想先审查内容再安装的情况：
+
+```bash
+# 1. 从 Releases 页面下载 dsh-token-board-<版本>.tgz 到本地
+# 2. 用文件路径安装
+dsh plugin --profile web add "/path/to/dsh-token-board-0.1.3.tgz"
+```
+
+下载后可以先核对内容：
+
+```bash
+tar -tzf dsh-token-board-0.1.3.tgz
+```
 
 ### 装完应该看到什么
 

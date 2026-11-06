@@ -1,6 +1,6 @@
 {
   "name": "dsh-token-board",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "description": "Token usage dashboard for the DeepSeek Harness Web GUI (dsh web and DSH Desktop): metric cards, a heat calendar over 3/6/12 months or all history, click-through day detail with provider breakdown, provider and model rankings, and a dual-metric trend chart. Reads local session logs only; no network access.",
   "icon": "icon.svg",
@@ -25,7 +25,8 @@
     "ORIGINALITY.md",
     "scripts/check-client.mjs",
     "scripts/dst.mjs",
-    "scripts/offline-backfill.mjs"
+    "scripts/offline-backfill.mjs",
+    "docs/images/overview.png"
   ],
   "keywords": [
     "dsh",
