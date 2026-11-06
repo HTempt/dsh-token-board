@@ -4,6 +4,9 @@
 当前版本：`0.1.4` —— **已发布**
 发布地址：https://www.npmjs.com/package/dsh-token-board
 
+> **发布与推送需要明确指令**：默认只做本地提交，`git push`、`npm publish`、
+> 建 Release 都要用户说一声才做。约定见 [AGENTS.md](AGENTS.md)。
+
 ## 发布记录
 
 2026-11-06 发布 `0.1.4`（可读模型名 / 0 行过滤 / 日详情工作区分布），registry 侧验证结果：
