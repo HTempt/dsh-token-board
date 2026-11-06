@@ -371,7 +371,11 @@ inject）与 `dsh-client-locale`、`dsh-client-ui-layout`、`dsh-client-ui-sideb
   目录键是短码（`dfmodel`、`qfmodel`……），面板显示 `DeepSeek-Flash`、`Qwen3.8-Flash`
   等真名，鼠标悬停仍是 `dfmodel`；排序、合并、占比全部按原始 id 计算。表按提供商分开，
   因为同一个短码在两个渠道可能指不同模型（`mmodel`：国际版 MiniMax-M3 / 中国版
-  MiniMax-M2.7）。表里没有的 id（渠道新增模型、或其它 provider）原样显示，不会消失。
+  MiniMax-M2.7）。表里没有的 id（渠道新增模型、或其它 provider）原样显示，不会消失；
+- **0 消耗 + 0 调用的行不画出来**：一条路由的请求全部失败时，token 与调用都是 0、
+  只有 attempts 有值。这类行仍留在接口数据里（失败统计要用），但日详情卡片与提供商 /
+  模型分布列表不再列它——一个孤零零的 `0` 会被读成真实用量。整天没有任何有效用量时，
+  日详情直接显示「这一天没有消耗记录」。
 
 ### 与外部 CSV 导出的实测一致性（2026-11-02）
 
@@ -516,6 +520,19 @@ profile 的 `package.json` 用 `link:` 指向它，`node_modules/dsh-token-board
 
 不要在 `~/.dsh/local-plugins/` 再复制一份：两份副本会让「改了没生效」这类问题
 重新出现。
+
+**改完不生效时先查这一条**：`node_modules/dsh-token-board` 可能不是链接，而是
+`dsh plugin add` 从 npm 装进来的一份副本——那时改 `local-plugins/` 完全不影响宿主，
+重启也白搭。一行判断：
+
+```bash
+node -e "console.log(require('fs').lstatSync(process.argv[1]).isSymbolicLink())" \
+  ~/.dsh/profiles/web/node_modules/dsh-token-board     # true = 链接，false = 副本
+```
+
+`false` 就把 profile 的 `dependencies` 改成 `link:<绝对路径>`，并用 junction
+（Windows）替换掉那份副本，之后重启 `dsh web`。2026-11-06 就是这么踩到的：
+依赖写的是 `^0.1.3`，宿主一直在跑 npm 那份旧的。
 
 改完的生效范围不同：
 

@@ -20,7 +20,12 @@
   `performance`、`efficient` 只在国际版）。表的内容对齐渠道包
   `dsh-our-free-model/vendor/channel-pack/pack.js` 的两个模型目录
   （`QODER_FALLBACK_MODELS` / `QODER_CN_FALLBACK_MODELS`）。
-- README「口径」补了一条：模型行显示可读名，但排序 / 合并 / 占比仍按原始路由 id 计算。
+- **0 消耗 + 0 调用的行不再显示。** 一条路由的请求全部失败时，它的 token 与调用都是 0，
+  只有 attempts 有值，日详情里就出现一张 `0 / 0` 的提供商卡片（例如一直在失败重试的
+  `qoder/dfmodel`）。现在日详情卡片与「提供商 / 模型」分布列表都跳过这类行；
+  接口数据里仍保留该行，所以失败统计与 attempts 不受影响。整天没有任何有效用量时，
+  日详情显示「这一天没有消耗记录」而不是一张空列表。
+- README「口径」补了两条：可读模型名与 0 行的显示规则。
 
 ### 未变（有意保留）
 
@@ -38,6 +43,9 @@
   分布页的窗口聚合（客户端按天求和的那段 `windowModels`）原来只复制 `model/tokens/calls`，
   会把 `name` 丢掉，已改为一起带上。排名组件 `ModelSection` 也同步改了，
   但它目前没有挂到任何页签上（改动只是防止它被重新接入时又退回短码）。
+- `lib/client.js`：新增 `hasFigure()` 谓词（`tokens > 0 || calls > 0`），日详情分组与两个
+  分布列表共用；分组是遍历模型行时先过滤，所以一个 provider 的模型全被过滤掉时，
+  整张提供商卡片一起消失，不用额外判空。
 - `scripts/unit.mjs`：新增 7 组断言（按 provider 解析、大小写、未知码回退、
   原型键不解析、模型行带 `name`、provider 行不带、未映射行无 `name`）。
 - `package.json` → `files[]` 增补 `lib/model-names.js` 与 `CHANGELOG.md`
@@ -51,9 +59,10 @@ node scripts/check-client.mjs  → OK（id / patch name / exports / seats 全部
 node scripts/smoke-host.mjs    → OK: payload is self-consistent（558 会话真实数据）
 真实会话复算 2026-11-06        → qodercn/dfmodel → "DeepSeek-Flash"，
                                  300,108,383 tokens / 599 calls，与面板当日一致
-headless Chrome + 真实数据预览 → 日详情 qodercn 行显示 "DeepSeek-Flash"（title 仍是
-                                 "dfmodel"）；分布·按模型显示 "qodercn/DeepSeek-Flash"；
-                                 workbuddy / trae / lobsterai 各行的原始 id 未受影响
+headless Chrome + 真实数据预览 → 日详情只剩 4 张卡片（qodercn / workbuddy / trae /
+                                 lobsterai），qoder 的 0/0 卡片消失；qodercn 行显示
+                                 "DeepSeek-Flash"（title 仍是 "dfmodel"）；分布·按模型
+                                 显示 "qodercn/DeepSeek-Flash"
 ```
 
 ### 发版前还要做
