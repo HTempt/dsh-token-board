@@ -3,7 +3,7 @@
 面向用户的变化记录在这里。**未发布的改动先记在「未发布」，发版时整段改成版本号**，
 并同步 `package.json` 的 `version`。发布步骤见 [PUBLISHING.md](PUBLISHING.md)。
 
-## 未发布
+## 0.1.4 — 2026-11-06
 
 ### 新增
 
@@ -108,11 +108,11 @@ headless Chrome + 真实数据预览 → 日详情只剩 4 张卡片（qodercn /
                                  没有工作区记录"，不出空白条
 ```
 
-### 发版前还要做
+### 发版记录
 
-1. `package.json` → `version`：`0.1.3` → `0.1.4`（本次为 patch）。
-2. `npm pack --dry-run` 确认产物含 `lib/model-names.js` 与 `CHANGELOG.md`，
-   且 `cordis.patch.yml` 仍在（缺它会发布成功但装不上）。加上这两份文件后是
-   **17 个文件**（改动前 15 个），358.8 kB / 解包 617.8 kB。
-3. 把本节内容改成 `## 0.1.4 — 2026-XX-XX`，再按 PUBLISHING.md 第 3、4 步发布与验证。
-4. 客户端改动刷新浏览器即可见；宿主改动（`lib/usage.js`）需重启 `dsh web`。
+- git：`chore(release): 0.1.4`，tag `v0.1.4`，已推送到 `origin`
+- npm：`dsh-token-board@0.1.4`（`registry.npmjs.org`，`latest`）
+- 打包：17 个文件，含 `lib/model-names.js` / `CHANGELOG.md` / `cordis.patch.yml`
+- 安装验证见 [PUBLISHING.md](PUBLISHING.md) 的发布记录
+
+下一版改动请在新的一段 `## 未发布` 里记录。
