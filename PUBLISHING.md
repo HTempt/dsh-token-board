@@ -125,7 +125,7 @@ npm whoami    # 应输出你的用户名
 ```bash
 cd dsh-token-board          # 本地目录名 == 包名；GitHub 仓库名仍是 dsh-usage-dashboard
 git status                 # 应为 clean，且已推送
-npm pack --dry-run         # 应为 13 个文件，且含 cordis.patch.yml
+npm pack --dry-run         # 应为 17 个文件（0.1.4 起），且含 cordis.patch.yml
 ```
 
 **关键自检**：输出里必须能看到 `cordis.patch.yml`。之前 `files[]` 漏了它，

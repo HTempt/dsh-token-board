@@ -366,7 +366,12 @@ inject）与 `dsh-client-locale`、`dsh-client-ui-layout`、`dsh-client-ui-sideb
 - **调用次数** = 有 usage 样本的请求数（不计失败尝试、不计重试）；
 - `failedCalls` / `retries` 另存，成功率按尝试数计算；
 - 合并 `usage-ledger.json`：按 (天, 提供商家族) 取 token 较大侧、**绝不求和**，调用按模型取大；
-- fork 会话按 `inheritedEventCount` 跳过继承前缀，避免父会话的用量被重算。
+- fork 会话按 `inheritedEventCount` 跳过继承前缀，避免父会话的用量被重算；
+- **模型行显示可读名，行的身份仍是原始路由 id**：`qoder` / `qodercn` 两个渠道的
+  目录键是短码（`dfmodel`、`qfmodel`……），面板显示 `DeepSeek-Flash`、`Qwen3.8-Flash`
+  等真名，鼠标悬停仍是 `dfmodel`；排序、合并、占比全部按原始 id 计算。表按提供商分开，
+  因为同一个短码在两个渠道可能指不同模型（`mmodel`：国际版 MiniMax-M3 / 中国版
+  MiniMax-M2.7）。表里没有的 id（渠道新增模型、或其它 provider）原样显示，不会消失。
 
 ### 与外部 CSV 导出的实测一致性（2026-11-02）
 
