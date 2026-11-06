@@ -1,5 +1,5 @@
 {
-  "name": "@htempt/dsh-usage-dashboard",
+  "name": "dsh-token-board",
   "version": "0.1.0",
   "type": "module",
   "description": "Token usage dashboard for the DSH web GUI: metric cards, a three-month daily heat calendar with token/call toggling, click-through day detail with provider breakdown, provider and model rankings, and a dual-metric trend chart.",

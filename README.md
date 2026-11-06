@@ -23,19 +23,19 @@
 一条命令完成安装（`dsh plugin` 会把参数转发给 pnpm，并自动登记 bundle）：
 
 ```bash
-dsh plugin --profile web add "@htempt/dsh-usage-dashboard"
+dsh plugin --profile web add "dsh-token-board"
 ```
 
 升级到最新发布版本：
 
 ```bash
-dsh plugin --profile web add "@htempt/dsh-usage-dashboard@latest"
+dsh plugin --profile web add "dsh-token-board@latest"
 ```
 
 卸载：
 
 ```bash
-dsh plugin --profile web remove "@htempt/dsh-usage-dashboard"
+dsh plugin --profile web remove "dsh-token-board"
 ```
 
 Desktop 用户把 `--profile web` 换成 `--profile desktop`。装完**重启对应的 DSH Host**
@@ -44,7 +44,7 @@ Desktop 用户把 `--profile web` 换成 `--profile desktop`。装完**重启对
 锁定到某个版本（避免跟随 `latest` 变化）：
 
 ```bash
-dsh plugin --profile web add "@htempt/dsh-usage-dashboard@0.1.0"
+dsh plugin --profile web add "dsh-token-board@0.1.0"
 ```
 
 ### 若 npm 上还没有这个版本
@@ -56,9 +56,10 @@ dsh plugin --profile web add "github:HTempt/dsh-usage-dashboard"
 dsh plugin --profile web add "github:HTempt/dsh-usage-dashboard#<commit-sha>"
 ```
 
-> **注意包名**：早期版本曾叫 `dsh-usage-dashboard`（无 scope）。npm 上这个名字
-> **已被另一作者的无关插件占用**，直接 `add dsh-usage-dashboard` 会装错东西。
-> 请始终使用带 scope 的 `@htempt/dsh-usage-dashboard`。
+> **注意包名**：本项目曾计划叫 `dsh-usage-dashboard`，但 npm 上那个名字
+> **已被另一作者的无关插件占用**（[zzdscs/dsh-usage-dashboard](https://github.com/1690834643/dsh-usage-dashboard)），
+> 直接 `add dsh-usage-dashboard` 会装错东西。发布名是 `dsh-token-board`；
+> `dsh-usage-board` 与 `dsh-token-dashboard` 也各有同类的既有插件，同样不要用。
 
 > **若从 git 安装时报 `allowBuilds` 相关错误**：pnpm 默认阻止 git 依赖执行
 > `prepare` 脚本。本包没有 `prepare` 脚本，正常情况下不会触发；万一被拦，按 pnpm
@@ -70,10 +71,10 @@ dsh plugin --profile web add "github:HTempt/dsh-usage-dashboard#<commit-sha>"
 ```bash
 dsh --dump-config --profile web | grep -A1 usage-dashboard
 # - id: usage-dashboard
-#   name: '@htempt/dsh-usage-dashboard'      ← 全树恰好出现 1 次
+#   name: 'dsh-token-board'      ← 全树恰好出现 1 次
 ```
 
-`dsh plugin add` 会自动把 `@htempt/dsh-usage-dashboard` 写进 profile `package.json`
+`dsh plugin add` 会自动把 `dsh-token-board` 写进 profile `package.json`
 的 `dsh.profile.bundles`，并加进 `dependencies`；`remove` 会同时清掉两处。
 **不要手工再在 profile 的 `cordis.patch.yml` 里写 insert**——注册点只有一个
 （`dsh.profile.bundles`，行由本包自带的 `cordis.patch.yml` 插入）。手工重复注册会让
@@ -288,7 +289,7 @@ const inject = ["webServer", "sessionPersistence", "sessions"];
 
 - **注册点只有一个**：`dsh.profile.bundles`。行本身由本包自带的
   `cordis.patch.yml`（`dsh.bundle.patch`）插入
-  `- id: usage-dashboard / name: @htempt/dsh-usage-dashboard`。不要在 profile 自己的
+  `- id: usage-dashboard / name: dsh-token-board`。不要在 profile 自己的
   `cordis.patch.yml` 里再写一遍。
 - **`cordis.patch.yml` 必须在发布内容里**：它同时出现在 `package.json` 的
   `files` 数组里。漏掉它的后果不是「少一个文件」而是**插件装不上**——

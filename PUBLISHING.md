@@ -1,16 +1,22 @@
 # 发布到 npm
 
-包名：`@htempt/dsh-usage-dashboard`
+包名：`dsh-token-board`（裸名，无 scope）
 当前版本：`0.1.0`
-发布地址：https://www.npmjs.com/package/@htempt/dsh-usage-dashboard
+发布地址：https://www.npmjs.com/package/dsh-token-board
 
-## 为什么需要你手动执行
+## 为什么叫这个名字
 
-发布用的 `registry.npmjs.org:443` 在这台机器上**连不通**（TCP 层超时，
-IPv4/IPv6、直连/代理都试过；同一时刻 `api.github.com` 正常）。另外本机也没有
-npm 登录凭据（`npm whoami` → `ENEEDAUTH`）。
+原计划用 `dsh-usage-dashboard`，但 npm 上已被他人占用。候选名里几个同类的也都
+名花有主，最终选 `dsh-token-board`：
 
-所以下面的步骤需要在一台能访问 npm、且已登录的机器上执行。
+| 候选名 | npm 状态 |
+|---|---|
+| `dsh-usage-dashboard` | ❌ 已被 `zzdscs` 占用（另一插件） |
+| `dsh-usage-board` | ❌ 已占用（同类用量看板） |
+| `dsh-token-dashboard` | ❌ 已占用（同类 token 统计，2026-08-18） |
+| `dsh-usage-panel` / `dsh-token-meter` / `dsh-usage-board` | ❌ 已占用 |
+| **`dsh-token-board`** | ✅ 可用，发布即为本包 |
+| `dsh-token-view` / `dsh-token-lens` / `dsh-tokendash` / `dsh-usage-kit` | ✅ 备选（未采用） |
 
 ## 发布前已完成的准备
 
@@ -18,16 +24,16 @@ npm 登录凭据（`npm whoami` → `ENEEDAUTH`）。
 
 | 项 | 状态 |
 |---|---|
-| `package.json` → `name` | `@htempt/dsh-usage-dashboard` |
-| `package.json` → `private` | 已删除（`true` 会让 npm 拒绝发布） |
-| `package.json` → `publishConfig` | `{ access: "public", registry: "https://registry.npmjs.org/" }`（scoped 包默认私有，必须显式 public） |
+| `package.json` → `name` | `dsh-token-board` |
+| `package.json` → `private` | 已删除（`true` 会让 npm 静默拒绝发布） |
+| `package.json` → `publishConfig` | `{ access: "public", registry: "https://registry.npmjs.org/" }` |
 | `files[]` | 含 `cordis.patch.yml`，打包 10 个文件 |
-| `cordis.patch.yml` | 行名已同步为 `@htempt/dsh-usage-dashboard`（必须与包名一致，否则加载失败） |
+| `cordis.patch.yml` | 行名已同步为 `dsh-token-board`（必须与包名一致，否则加载失败） |
 | `LICENSE` / `THIRD-PARTY.md` | 已在打包内 |
-| 打包自检 | `npm pack --dry-run` 通过，产物 `htempt-dsh-usage-dashboard-0.1.0.tgz` |
+| 打包自检 | `npm pack --dry-run` 通过，产物 `dsh-token-board-0.1.0.tgz` |
 
-用本地 tgz 做过完整的安装链路验证：`dsh plugin add` → bundle 自动登记 →
-`dsh --dump-config` 恰好 1 条 → 包可加载 → 元信息（图标）可读。
+用本地 tgz 做过完整链路验证：`dsh plugin add` → bundle 自动登记 → `dsh --dump-config`
+恰好 1 条 → 裸名可 `import` → 元信息（图标）可读。
 
 ## 执行步骤
 
@@ -35,79 +41,76 @@ npm 登录凭据（`npm whoami` → `ENEEDAUTH`）。
 
 ```bash
 npm login --registry=https://registry.npmjs.org/
-npm whoami    # 应输出 htempt
+npm whoami    # 应输出你的用户名
 ```
 
-需要 `@htempt` 这个 scope 下的发布权限。若是新注册的组织，确认账号已加入
-`htempt` scope，否则发布会报 `E404` 或 `403`。
+裸名不需要组织/scope 权限，普通账号即可。
 
 ### 2. 在仓库目录检查
 
 ```bash
 cd dsh-usage-dashboard
 git status                 # 应为 clean，且已推送
-npm pack --dry-run         # 确认 10 个文件、含 cordis.patch.yml
+npm pack --dry-run         # 应为 10 个文件，且含 cordis.patch.yml
 ```
 
-**关键自检**：输出里必须能看到 `cordis.patch.yml`。之前就是因为 `files[]` 漏了它，
+**关键自检**：输出里必须能看到 `cordis.patch.yml`。之前 `files[]` 漏了它，
 安装时 `dsh plugin add` 直接报
 `failed to read overlay .../cordis.patch.yml` 并回滚整个安装。
 
 ### 3. 发布
 
 ```bash
-npm publish --access public --registry=https://registry.npmjs.org/
+npm publish --registry=https://registry.npmjs.org/
 ```
 
-`publishConfig` 里已写死 `registry` 和 `access`，所以 `npm publish` 不带参数
-也会走官方源并公开。但**冗余写一次更保险**，避免本机 `.npmrc` 把
-`registry` 指向 npmmirror（这台机器的默认值就是 `https://registry.npmmirror.com`，
-而镜像是只读的，直接 `npm publish` 会失败）。
+`publishConfig` 里已写死 `registry`，但**建议仍显式带上**：本机 `.npmrc` 的
+默认 registry 是 `https://registry.npmmirror.com`（只读镜像），不带参数可能失败。
 
 ### 4. 验证发布结果
 
 ```bash
-npm view @htempt/dsh-usage-dashboard version --registry=https://registry.npmjs.org/
+npm view dsh-token-board version --registry=https://registry.npmjs.org/
 # 0.1.0
 
-npm view @htempt/dsh-usage-dashboard dist.tarball --registry=https://registry.npmjs.org/
+npm view dsh-token-board dist.tarball --registry=https://registry.npmjs.org/
 ```
 
-然后在一个干净的 profile 里试装：
+然后在干净 profile 里试装：
 
 ```bash
-DSH_HOME=/tmp/npm_e2e dsh plugin --profile web add "@htempt/dsh-usage-dashboard"
-DSH_HOME=/tmp/npm_e2e dsh --dump-config --profile web | grep -c "name: '@htempt/dsh-usage-dashboard'"
+DSH_HOME=/tmp/npm_e2e dsh plugin --profile web add dsh-token-board
+DSH_HOME=/tmp/npm_e2e dsh --dump-config --profile web | grep -c "^- id: usage-dashboard"
 # 期望 1
 rm -rf /tmp/npm_e2e
 ```
 
 ## 后续版本
 
-版本号遵循语义化版本，发布新版本：
-
 ```bash
 npm version patch          # 或 minor / major，会打 git tag
 git push --follow-tags
-npm publish --access public --registry=https://registry.npmjs.org/
+npm publish --registry=https://registry.npmjs.org/
 ```
 
-用户侧升级：
+用户升级：
 
 ```bash
-dsh plugin --profile web add "@htempt/dsh-usage-dashboard@latest"
+dsh plugin --profile web add dsh-token-board@latest
 ```
 
 ## 已知的坑
 
-- **不要用裸包名**：`dsh-usage-dashboard` 在 npm 上属于另一作者的无关插件
-  （[zzdscs/dsh-usage-dashboard](https://github.com/1690834643/dsh-usage-dashboard)）。
-  必须带 `@htempt/` scope。
-- **`private: true` 会静默阻止发布**：报错是 `This package has been marked as
-  private and cannot be published`。已删除，后续别加回来。
-- **`files[]` 必须含 `cordis.patch.yml`**：少了它包能发布但装不上，
-  而且要到用户执行 `dsh plugin add` 时才暴露。
-- **`cordis.patch.yml` 里的 `name` 必须等于包名**：改成 scoped 后不同步，
-  加载期会找不到模块。
-- 从 npm 装不会有 `allowBuilds` / `prepare` 问题（那是 git 来源专有的），
+- **别用 `dsh-usage-dashboard`**：npm 上属于另一作者的无关插件。
+  `dsh-usage-board`、`dsh-token-dashboard` 同样是别人的同类插件。
+- **`private: true` 会阻止发布**：报 `This package has been marked as private
+  and cannot be published`。已删除，别加回来。
+- **`files[]` 必须含 `cordis.patch.yml`**：少了它包能发布但**装不上**，
+  而且要等用户执行 `dsh plugin add` 才暴露。
+- **`cordis.patch.yml` 里的 `name` 必须等于包名**：改包名时两处要一起改。
+- **改包名后要同步本地 profile**：`dsh.profile.bundles` 与 `dependencies` 里的
+  名字、以及 `node_modules` 的软链，否则组合出的条目解析不到模块
+  （`MODULE_NOT_FOUND`）。改完跑 `dsh plugin --profile web install` 重建，
+  并清掉旧名残留软链。
+- 从 npm 安装不会有 `allowBuilds` / `prepare` 问题（那是 git 来源专有的），
   所以发布后应优先推荐 npm 安装。
