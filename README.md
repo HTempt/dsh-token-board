@@ -128,23 +128,19 @@ const inject = ["webServer", "sessionPersistence", "sessions"];
 
 ### 支持哪些平台
 
-界面的准入条件只有一个：宿主必须提供 **Web GUI**（浏览器半声明
-`"dsh.client.platform": "web"`，DSH 的客户端加载器只认这个值，
-`dsh-client-modules` 里 `decl.platform !== "web"` 就直接跳过）。
+插件界面要求宿主提供 **Web GUI**（浏览器半声明 `"dsh.client.platform": "web"`，
+DSH 的客户端加载器只认这个值）。下列两种运行方式都提供 Web GUI，因此都能用：
 
-所以「能不能用」取决于**运行方式**，而不是产品名字：
+| 运行方式 | profile | 说明 |
+|---|---|---|
+| `dsh web`（浏览器） | `web` | 标准用法 |
+| **DSH Desktop**（dshdesktop.com） | `web` | Electron 桌面客户端，内部启动的就是 `web` profile |
 
-| 运行方式 | profile | 界面可用 | 说明 |
-|---|---|---|---|
-| `dsh web`（浏览器） | `web` | ✅ | 标准用法 |
-| **DSH Desktop**（dshdesktop.com，第三方） | `web` | ✅ | Electron 包壳，内部启动的就是 `web` profile |
-| `headless` | `headless` | ❌ | 无 GUI；宿主半统计与两个路由照常工作 |
-| `acp` 客户端集成 | `acp` | ❌ | 同上 |
+**两者用的是同一个 profile**，所以安装命令一致：`--profile web`。
 
-**没有 `desktop` 这个 profile。** 官方 profile 模板只有 `web`、`headless`、`acp`、
-`sdk`、`sdk-minimal`；DSH Desktop 的依赖里含 `@deepseek-ai/dsh-web-app` 与
-`dsh-web-frontend`，证实它跑的就是 `web` profile。因此 Desktop 用户同样执行
-`--profile web`。
+**关于 DSH Desktop**：它是 Dataelem 团队的第三方客户端
+（`github.com/dataelement/dsh-desktop`，MIT），**不是 DeepSeek 官方产品**。
+官方 profile 模板里没有 `desktop` 这一项，也**没有** `dsh desktop` 命令。
 
 装之前可以这样确认目标 profile：
 
