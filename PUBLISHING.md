@@ -37,7 +37,46 @@
 
 ## 执行步骤
 
-### 1. 登录 npm
+### 1. 认证：token 必须带 publish 权限
+
+`npm login` 只能证明「你是谁」，**不保证能发布**。2026-11-06 实际卡在这里：
+
+```
+npm error code E403
+npm error 403 403 Forbidden - PUT https://registry.npmjs.org/dsh-token-board
+npm error 403 Two-factor authentication or granular access token with bypass 2fa enabled is required to publish packages.
+```
+
+关键判断顺序（别被报错文案误导）：
+
+1. 先查账号是否真的开了 2FA：
+   `curl -H "Authorization: Bearer $TOKEN" https://registry.npmjs.org/-/npm/v1/user`
+   → `"tfa": false` 说明**根本不是 2FA 问题**，报错文案里的 "Two-factor
+   authentication **or** ..." 是并列的两种可能。
+2. 再查 token 有没有写权限：拿它对一个不存在的测试名发 `PUT`，若仍报同一条
+   403，就是 token 权限不足，与账号设置无关。
+3. 本机那次用的是 `npm_` 前缀的 **granular access token**，创建时没勾
+   **Read and write** / **Bypass 2FA**，所以必然被拒。
+
+**正确的 token 设置**（npmjs.com → Access Tokens → Generate New Token → Granular）：
+
+| 设置项 | 必须值 |
+|---|---|
+| Permissions | **Read and write** |
+| Packages and scopes | `All packages`，或至少指定本包 |
+| **Bypass 2FA** | ✅ 勾选（否则交互发布才会要 OTP，而 `.npmrc` 里有 token 时 npm 不弹提示，直接 403） |
+
+写入 `.npmrc`：
+
+```bash
+npm config set //registry.npmjs.org/:_authToken "<token>"
+```
+
+> **注意**：`.npmrc` 里存了 token 时，`npm publish` **不会**再提示输入 OTP
+> —— 它会直接拿这个 token 去发。所以「在终端手动发」并不会绕过权限问题，
+> token 本身必须够权。这是最容易误判的地方。
+
+`npm login` 本身仍值得跑一次（确认身份）：
 
 ```bash
 npm login --registry=https://registry.npmjs.org/
