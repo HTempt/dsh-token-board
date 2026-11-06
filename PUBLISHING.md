@@ -1,12 +1,36 @@
 # 发布到 npm
 
 包名：`dsh-token-board`（裸名，无 scope）
-当前版本：`0.1.0` —— **已发布**
+当前版本：`0.1.4` —— **已发布**
 发布地址：https://www.npmjs.com/package/dsh-token-board
 
 ## 发布记录
 
-2026-11-06 首次发布成功，registry 侧验证结果：
+2026-11-06 发布 `0.1.4`（可读模型名 / 0 行过滤 / 日详情工作区分布），registry 侧验证结果：
+
+| 项 | 值 |
+|---|---|
+| `dist-tags.latest` | `0.1.4` |
+| tarball shasum | `41277a53a2a05be1ea140b185f8cdf7acfdc143d`（与本地 `npm publish` 输出、下载回来的 tgz 一致） |
+| 包大小 | 365.3 kB（解包 636.0 kB，17 个文件） |
+| git | `chore(release): 0.1.4` + tag `v0.1.4`，已推送 `origin` |
+
+从**已发布的 tgz** 实装验证（不是本地文件）：
+
+```
+curl registry.npmjs.org/dsh-token-board/-/dsh-token-board-0.1.4.tgz → 365,348 B，sha1 与上表一致
+tar -tzf                                                          → 17 个文件，含 cordis.patch.yml /
+                                                                     lib/model-names.js / CHANGELOG.md
+DSH_HOME=<scratch> dsh plugin --profile web add <该 tgz>           → 安装成功，0.1.4
+DSH_HOME=<scratch> dsh --dump-config --profile web                → - id: dsh-token-board / name: dsh-token-board
+```
+
+> 本机网络到 github.com 的 443 会被重置，推代码需要走本机代理：
+> `git -c http.proxy=http://127.0.0.1:7897 -c https.proxy=... push origin main v0.1.4`。
+> npm registry 直连正常，但默认 registry 是 npmmirror，发布必须显式
+> `--registry=https://registry.npmjs.org/`。
+
+2026-11-06 首次发布（`0.1.0`）成功，registry 侧验证结果：
 
 | 项 | 值 |
 |---|---|
