@@ -1,16 +1,9 @@
 # dsh-usage-dashboard
 
-> 全面了解 DeepSeek Harness 的 Token 消耗与调用情况。
->
-> 给 [DeepSeek Harness](https://github.com/deepseek-ai) Web GUI 用的 Token 消耗统计插件：
-> 侧边栏加一行「使用统计」，中栏渲染完整看板——今日/本月/区间指标卡、
-> 三个月热力日历、点开某天的来源明细、提供商与模型排名、双指标趋势图。
+为 [DeepSeek Harness](https://github.com/deepseek-ai) 网页端（`dsh web`）提供 Token 用量看板的插件：它把本机会话日志折叠成日/提供商/模型三个维度的统计，在侧边栏加一个「使用统计」入口，并渲染今日、本月与所选区间的消耗卡片、3/6/12 个月热力日历、点开某天查看按来源拆分的明细（含缓存命中率）、提供商与模型排行，以及 Token 与调用次数的双轴趋势图；全部数据只来自本机、不联网不上报，插件也只写自己的统计与缓存文件。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%5E22.19%20%7C%7C%20%3E%3D24-brightgreen)](package.json)
-
-数据**全部来自本机会话日志**，不联网、不上报、不折算金额。插件只写自己的一两个
-文件（见「写盘范围」），不修改 DSH 的会话库。
 
 ---
 
@@ -25,46 +18,72 @@
 | 哪个提供商/模型最费 | 「按提供商」/「按模型」页签 |
 | 趋势怎么走 | 底部双指标趋势图（token 与调用次数各一条纵轴） |
 
-## 快速开始
+## 安装
+
+> ⚠️ **本包的 npm 名称 `dsh-usage-dashboard` 已被他人占用**
+> （[zzdscs/dsh-usage-dashboard](https://github.com/1690834643/dsh-usage-dashboard)，另一个插件）。
+> 所以下面一律使用 **GitHub 来源**安装，不要写裸包名。
+
+一条命令完成安装（`dsh plugin` 会把参数转发给 pnpm，并自动登记 bundle）：
 
 ```bash
-cd ~/.dsh/profiles/web/local-plugins
-git clone https://github.com/HTempt/dsh-usage-dashboard.git
-cd ..
+dsh plugin --profile web add "github:HTempt/dsh-usage-dashboard"
 ```
 
-在 `~/.dsh/profiles/web/package.json` 里做两件事：
-
-```jsonc
-{
-  "dsh": {
-    "profile": {
-      "bundles": [
-        // …保留原有内容，末尾追加这一行
-        "dsh-usage-dashboard"
-      ]
-    }
-  },
-  "dependencies": {
-    // …保留原有内容，末尾追加这一行
-    "dsh-usage-dashboard": "link:C:/Users/<you>/.dsh/profiles/web/local-plugins/dsh-usage-dashboard"
-  }
-}
-```
-
-然后：
+升级到最新提交（同一条，重跑即可）：
 
 ```bash
+dsh plugin --profile web add "github:HTempt/dsh-usage-dashboard"
+```
+
+卸载：
+
+```bash
+dsh plugin --profile web remove dsh-usage-dashboard
+```
+
+Desktop 用户把 `--profile web` 换成 `--profile desktop`。装完**重启对应的 DSH Host**
+（只刷新浏览器窗口不会加载新的服务端插件），然后 Ctrl+F5。
+
+锁定到某个提交安装（避免跟随 `main` 变化）：
+
+```bash
+dsh plugin --profile web add "github:HTempt/dsh-usage-dashboard#<commit-sha>"
+```
+
+### 为什么不用 `npm` 名安装
+
+`dsh plugin add <包名>` 默认从 npm registry 取包。本包与 npm 上同名包**不是同一个项目**，
+若直接 `add dsh-usage-dashboard`，装到的是别人的插件。GitHub 来源由 pnpm 直接拉取本仓库，
+不存在这个歧义。
+
+> **若从 git 安装时报 `allowBuilds` 相关错误**：pnpm 默认阻止 git 依赖执行
+> `prepare` 脚本。本包没有 `prepare` 脚本，正常情况下不会触发；万一被拦，按 pnpm
+> 打印的键名把它加进 profile 的 `pnpm-workspace.yaml` → `allowBuilds` 后重跑。
+
+### 装完应该看到什么
+
+```bash
+dsh --dump-config --profile web | grep -A1 usage-dashboard
+# - id: usage-dashboard
+#   name: dsh-usage-dashboard      ← 全树恰好出现 1 次
+```
+
+`dsh plugin add` 会自动把 `dsh-usage-dashboard` 写进 profile `package.json` 的
+`dsh.profile.bundles`，并加进 `dependencies`；`remove` 会同时清掉两处。
+**不要手工再在 profile 的 `cordis.patch.yml` 里写 insert**——注册点只有一个
+（`dsh.profile.bundles`，行由本包自带的 `cordis.patch.yml` 插入）。手工重复注册会让
+插件管理页的卡片读成「已关闭」而组件行显示「运行中」，因为开关只认 bundles，
+组件行认 Loader 实际条目，两个字段来源不同。
+
+### 手动安装（离线 / 开发）
+
+```bash
+git clone https://github.com/HTempt/dsh-usage-dashboard.git \
+  ~/.dsh/profiles/web/local-plugins/dsh-usage-dashboard
 cd ~/.dsh/profiles/web
-dsh plugin install      # 让 pnpm 建好 node_modules 链接
-# 重启 dsh web，浏览器 Ctrl+F5
+dsh plugin --profile web add "link:./local-plugins/dsh-usage-dashboard"
 ```
-
-> **注册点只有一个**：`dsh.profile.bundles`。行本身由本包自带的
-> `cordis.patch.yml` 插入（`- id: usage-dashboard / name: dsh-usage-dashboard`）。
-> **不要**再在 profile 自己的 `cordis.patch.yml` 里写一遍同样的 insert——那样
-> 插件管理页的卡片会读成「已关闭」，而组件行却显示「运行中」（两个字段来自两套
-> 数据源），这个坑真实发生过。详见「安装」章节。
 
 ## 它需要宿主提供什么
 
@@ -259,32 +278,23 @@ const inject = ["webServer", "sessionPersistence", "sessions"];
 > 退到**前一天**，今日那一行落在窗口外——「今日消耗」显示 0，本月卡也漏掉今天。
 > `scripts/timezone.mjs` 锁死这条行为（UTC+8 / UTC / UTC-5 各验一遍）。
 
-## 安装
+## 安装位置与文件要求（维护者）
 
-```bash
-# 1. 放进 profile 的 local-plugins
-cp -r dsh-usage-dashboard ~/.dsh/profiles/web/local-plugins/
+安装命令见上。这里只记几条容易踩的约束：
 
-# 2. 声明为 link 依赖（写进 package.json，再让 pnpm 建链接）
-#    dependencies: "dsh-usage-dashboard": "link:C:/Users/<you>/.dsh/profiles/web/local-plugins/dsh-usage-dashboard"
-cd ~/.dsh/profiles/web && dsh plugin --profile web install
-```
-
-注册点只有一个：把 `dsh-usage-dashboard` 加进 profile 的 `dsh.profile.bundles`，
-由本包自带的 `cordis.patch.yml`（`dsh.bundle.patch`）插入
-`- id: usage-dashboard / name: dsh-usage-dashboard` 这一行。
-
-**不要再**在 profile 自己的 `cordis.patch.yml` 里再写一遍同样的 insert：
-那样树上只有一行（靠 id 去重），插件管理页的卡片却会读成「已关闭」——
-卡片上的开关只认 `dsh.profile.bundles`（`enabled = selected.includes(name)`），
-而组件行认的是 Loader 里的实际条目，于是出现「开关是关的、组件却显示运行中」。
-2026-11-06 就是这么修的：从 profile patch 里删掉那段 insert，改为只登记 bundle。
-
-`icon.svg` 必须存在：`package.json` 的 `"icon"` 字段指向它，缺文件会让插件管理页
-在卡片和组件行上各报一条「包元信息错误 … lstat … icon.svg: no such file or directory」
-（只是显示层诊断，不影响插件运行，但会很显眼）。该图标不得指向包目录之外的路径。
-
-改完重启 `dsh web`（HMR 只覆盖客户端插件，node 半需要重启）。
+- **注册点只有一个**：`dsh.profile.bundles`。行本身由本包自带的
+  `cordis.patch.yml`（`dsh.bundle.patch`）插入
+  `- id: usage-dashboard / name: dsh-usage-dashboard`。不要在 profile 自己的
+  `cordis.patch.yml` 里再写一遍。
+- **`cordis.patch.yml` 必须在发布内容里**：它同时出现在 `package.json` 的
+  `files` 数组里。漏掉它的后果不是「少一个文件」而是**插件装不上**——
+  `dsh plugin add` 会在校验阶段报
+  `failed to read overlay … cordis.patch.yml` 并回滚整个安装。改动 `files`
+  后请用 `npm pack --dry-run` 确认。
+- **`icon.svg` 必须存在**：`package.json` 的 `"icon"` 指向它，缺文件会让插件
+  管理页在卡片和组件行上各报一条「包元信息错误 … lstat … icon.svg」。
+  图标必须是包目录内的相对路径、SVG/PNG/JPEG/WebP、≤ 256 KiB。
+- 改 `lib/index.js` 等宿主半代码后**必须重启 `dsh web`**（HMR 只覆盖浏览器端）。
 
 ## 验证脚本
 

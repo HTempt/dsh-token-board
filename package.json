@@ -15,11 +15,14 @@
   },
   "files": [
     "lib/index.js",
+    "lib/client.js",
     "lib/usage.js",
     "lib/ledger-merge.js",
-    "lib/client.js",
+    "cordis.patch.yml",
     "icon.svg",
-    "README.md"
+    "README.md",
+    "THIRD-PARTY.md",
+    "LICENSE"
   ],
   "keywords": [
     "dsh",
