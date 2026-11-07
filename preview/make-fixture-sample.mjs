@@ -236,6 +236,69 @@ const workspaces = WORKSPACES.map((workspace, index) => {
 
 const unattributed = { name: "（未归属）", tokens: Math.round(windowTotals.tokens * 0.031), calls: Math.round(windowTotals.calls * 0.028) };
 
+/**
+ * A synthetic 24-slot time-of-day histogram.
+ *
+ * Shaped like a real working day — a small tail after midnight, a ramp from
+ * 09:00, a plateau across the afternoon, a fade after 18:00 — so the preview
+ * exercises both a tall slot and several empty ones. Deterministic: the same
+ * weights always produce the same bars.
+ *
+ * `coveredTokens` is deliberately BELOW `windowTokens`, matching the real host:
+ * the archive is day-granular, so the histogram never covers the whole window.
+ */
+const HOUR_WEIGHTS = [
+	0.02, 0.005, 0, 0, 0, 0, 0, 0.01, 0.06, 0.42, 0.78, 0.86,
+	0.9, 0.71, 1.0, 0.94, 0.88, 0.83, 0.62, 0.55, 0.48, 0.36, 0.22, 0.09
+];
+const HOUR_COVERAGE = 0.94;
+const coveredTokens = Math.round(windowTotals.tokens * HOUR_COVERAGE);
+const coveredCalls = Math.round(windowTotals.calls * HOUR_COVERAGE);
+const weightSum = HOUR_WEIGHTS.reduce((sum, weight) => sum + weight, 0);
+/** How many of the window's days recorded usage in a slot: a plausible spread. */
+const hourOfDaySlots = HOUR_WEIGHTS.map((weight, hour) => {
+	const share = weight / weightSum;
+	const tokens = Math.round(coveredTokens * share);
+	const calls = Math.round(coveredCalls * share);
+	// Busy slots run most days; the 02:00–07:00 dead zone runs none.
+	const activeDays = weight <= 0 ? 0 : Math.max(1, Math.round(days.length * Math.min(0.62, weight * 0.62)));
+	return {
+		hour,
+		tokens,
+		calls,
+		failedCalls: Math.round(calls * 0.004),
+		retries: Math.round(calls * 0.002),
+		attempts: calls + Math.round(calls * 0.004),
+		successRate: 99.6,
+		inputTokens: Math.round(tokens * 0.06),
+		outputTokens: Math.round(tokens * 0.09),
+		cacheReadTokens: Math.round(tokens * 0.83),
+		cacheWriteTokens: Math.round(tokens * 0.02),
+		reasoningTokens: 0,
+		cacheHitRate: 92.8,
+		activeDays,
+		tokensPerDay: activeDays > 0 ? Math.round(tokens / activeDays) : 0,
+		callsPerDay: activeDays > 0 ? Math.round((calls / activeDays) * 10) / 10 : 0
+	};
+});
+const hourOfDay = {
+	hours: hourOfDaySlots,
+	totals: {
+		tokens: coveredTokens,
+		calls: coveredCalls,
+		failedCalls: Math.round(coveredCalls * 0.004),
+		retries: Math.round(coveredCalls * 0.002),
+		attempts: coveredCalls + Math.round(coveredCalls * 0.004),
+		successRate: 99.6,
+		cacheHitRate: 92.8
+	},
+	updatedAt: NOW,
+	source: "sessions",
+	timeZone: null,
+	coveredTokens,
+	windowTokens: windowTotals.tokens
+};
+
 const monthFrom = `${days.at(-1).date.slice(0, 7)}-01`;
 const monthDays = days.filter((day) => day.date >= monthFrom);
 
@@ -256,6 +319,7 @@ const payload = {
 	models: [...modelTotals.values()].map(settle).sort((a, b) => b.tokens - a.tokens),
 	workspaces,
 	unattributed,
+	hourOfDay,
 	days: days.map((day) => ({ date: day.date, tokens: day.tokens, calls: day.calls, failedCalls: day.failedCalls, attempts: day.attempts, successRate: day.successRate, inputTokens: day.inputTokens, outputTokens: day.outputTokens, cacheReadTokens: day.cacheReadTokens, cacheWriteTokens: day.cacheWriteTokens, reasoningTokens: day.reasoningTokens, cacheHitRate: day.cacheHitRate, byProvider: day.byProvider, byModel: day.byModel })),
 	sessions: workspaces.reduce((sum, workspace) => sum + workspace.sessions, 0),
 	refreshing: false,

@@ -15,7 +15,7 @@
 <div id="mount"></div>
 <script src="react.js"></script>
 <script src="react-dom.js"></script>
-<script src="fixture.js"></script>
+<script src="fixture.js"></script>
 <script src="loader.js"></script>
 <script>
 (function main() {
@@ -44,6 +44,32 @@
 	const originalFetch = window.fetch.bind(window);
 	window.fetch = function (input, init) {
 		const url = String(input);
+		if (url.startsWith("/api/usage-dashboard/day")) {
+			// The day route is read on demand when a day dialog opens. Synthesize
+			// it from the summary's own histogram so the strip shows a real shape
+			// without a second fixture file: scale the window's 24 slots down to
+			// one day and label it with the requested date.
+			const requested = new URL(url, "http://preview").searchParams.get("date") ?? "";
+			const hist = basePayload.hourOfDay;
+			const dayRow = (basePayload.days ?? []).find((entry) => entry.date === requested) ?? null;
+			const slotTotal = hist === undefined ? 0 : hist.hours.reduce((sum, slot) => sum + slot.tokens, 0);
+			const scale = dayRow !== null && slotTotal > 0 ? dayRow.tokens / slotTotal : 0;
+			const day = dayRow === null ? null : Object.assign({}, dayRow, {
+				byWorkspace: dayRow.byWorkspace ?? [],
+				hourOfDay: hist.hours.map((slot) => Object.assign({}, slot, {
+					tokens: Math.round(slot.tokens * scale),
+					calls: Math.round(slot.calls * scale),
+					inputTokens: Math.round(slot.inputTokens * scale),
+					outputTokens: Math.round(slot.outputTokens * scale),
+					cacheReadTokens: Math.round(slot.cacheReadTokens * scale),
+					cacheWriteTokens: Math.round(slot.cacheWriteTokens * scale),
+					reasoningTokens: Math.round(slot.reasoningTokens * scale),
+					tokensPerDay: Math.round(slot.tokensPerDay * scale),
+					callsPerDay: Math.round(slot.callsPerDay * scale * 10) / 10
+				}))
+			});
+			return Promise.resolve(new Response(JSON.stringify({ ok: true, date: requested, day, refreshing: false, partial: false, updatedAt: basePayload.updatedAt }), { status: 200, headers: { "content-type": "application/json" } }));
+		}
 		if (url.startsWith("/api/usage-dashboard/summary")) {
 			if (scene === "error") {
 				return Promise.resolve(new Response("boom", { status: 500 }));
