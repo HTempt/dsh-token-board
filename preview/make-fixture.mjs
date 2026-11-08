@@ -25,6 +25,8 @@
  */
 import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { dshHome, harness } from "../scripts/harness.mjs";
 
 if (process.env.DSH_FIXTURE_ALLOW_PRIVATE !== "1") {
@@ -104,4 +106,33 @@ for (let attempt = 0; attempt < 400; attempt += 1) {
 writeFileSync(new URL("./fixture.js", import.meta.url), `window.__FIXTURE__=${JSON.stringify(payload)};`, "utf8");
 writeFileSync(new URL("./payload.json", import.meta.url), JSON.stringify(payload), "utf8");
 console.log("days", payload.days.length, "sessions", payload.sessions, "month", payload.month?.from, "→", payload.month?.to);
+
+// These two files now hold the author's real workspace paths, provider routes
+// and token totals. They are COMMITTED files (the preview harness needs them),
+// so leaving the real version in place risks publishing it.
+//
+// The pre-commit guard (scripts/check-secrets.mjs) will block such a commit,
+// but saying so HERE means the mistake is caught at the moment it is made,
+// not at the moment someone tries to commit.
+//
+// The check is run for real, not just announced: if the guard ever stops
+// seeing the data (a renamed folder, a new format), this says so here
+// instead of letting the commit fail later with a confusing message.
+const guardScript = fileURLToPath(new URL("../scripts/check-secrets.mjs", import.meta.url));
+const guard = spawnSync(process.execPath, [guardScript, "--paths", "preview/payload.json"], { encoding: "utf8" });
+// The guard exits 1 when it DOES see the data — that is the good outcome here.
+const guardSees = guard.status === 1;
+console.log("");
+console.log("  ⚠ preview/fixture.js and preview/payload.json now hold REAL data.");
+console.log("    Do not commit them. To put the synthetic fixture back:");
+console.log("");
+console.log("      node preview/make-fixture-sample.mjs");
+console.log("");
+if (guardSees) {
+	console.log("    The pre-commit hook is armed and will refuse such a commit.");
+} else {
+	console.log("    ⚠ The pre-commit guard did NOT flag these files. Check that");
+	console.log("      scripts/check-secrets.mjs still matches the real data shape.");
+}
+console.log("");
 process.exit(0);
