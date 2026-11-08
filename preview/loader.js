@@ -55,6 +55,10 @@ window.__MODULE_TABLE__ = {};
 			cache[id] = { jsx: make, jsxs: make, Fragment: window.React.Fragment };
 			return cache[id];
 		}
+		if (id === "react-dom") {
+			cache[id] = window.ReactDOM;
+			return cache[id];
+		}
 		// Any other module is an injected service we do not need in the preview.
 		cache[id] = {};
 		return cache[id];
@@ -86,6 +90,8 @@ window.__MODULE_TABLE__ = {};
 
 window.__PREVIEW_ZH__ ={
 	"entry.label": "使用统计",
+	"entry.todayCalls": "今日 {count} 次",
+	"entry.todayChipHint": "点击查看今日明细",
 	"page.title": "使用统计",
 	"page.subtitle": "全面了解 DeepSeek Harness 的 Token 消耗与调用情况",
 	"page.updatedAt": "更新于 {time}",
@@ -280,6 +286,8 @@ window.__PREVIEW_ZH__ ={
 
 window.__PREVIEW_EN__ ={
 	"entry.label": "Usage",
+	"entry.todayCalls": "Today {count}",
+	"entry.todayChipHint": "Click for today's detail",
 	"page.title": "Usage",
 	"page.subtitle": "Token consumption and call volume across DeepSeek Harness",
 	"page.updatedAt": "Updated {time}",

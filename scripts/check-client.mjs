@@ -52,9 +52,10 @@ if (patchName !== packageName) {
 console.log("patch name:", JSON.stringify(patchName), "— matches package name");
 const react = { useCallback: (f) => f, useState: (v) => [v, () => {}], useEffect: () => {}, useMemo: (f) => f(), useRef: (v) => ({ current: v }), Fragment: "Fragment" };
 const jsx = { jsx: (t, p) => ({ t, p }), jsxs: (t, p) => ({ t, p }), Fragment: "Fragment" };
+const react_dom = { createRoot: () => ({ render() {}, unmount() {} }) };
 let mod;
 try {
-  mod = entry.factory((name) => (name === "react" ? react : jsx));
+  mod = entry.factory((name) => (name === "react" ? react : name === "react-dom" ? react_dom : jsx));
 } catch (error) {
   console.log("FACTORY THREW:", error && error.message);
   process.exit(1);
