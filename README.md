@@ -31,7 +31,7 @@
 dsh plugin --profile web add "dsh-token-board"
 ```
 
-> 从 npm 安装，当前版本 `0.1.4`。
+> 从 npm 安装，当前版本 `0.1.5`。
 
 升级到最新发布版本：
 
@@ -48,7 +48,7 @@ dsh plugin --profile web add "dsh-token-board@latest"
 >
 > ```bash
 > # 1. 指定精确版本，不查 dist-tags，不受缓存影响
-> dsh plugin --profile web add "dsh-token-board@0.1.4"
+> dsh plugin --profile web add "dsh-token-board@0.1.5"
 >
 > # 2. 删掉该包的元数据缓存再装
 > rm -f ~/AppData/Local/pnpm-cache/v11/metadata/*/dsh-token-board.jsonl   # Windows 路径同理
@@ -92,7 +92,7 @@ dsh plugin --profile web remove "dsh-token-board"
 锁定到某个版本（避免跟随 `latest` 变化）：
 
 ```bash
-dsh plugin --profile web add "dsh-token-board@0.1.4"
+dsh plugin --profile web add "dsh-token-board@0.1.5"
 ```
 
 ### 若 npm 上还没有这个版本
@@ -117,13 +117,13 @@ dsh plugin --profile web add "github:HTempt/dsh-token-board#<commit-sha>"
 ```bash
 # 1. 从 Releases 页面下载 dsh-token-board-<版本>.tgz 到本地
 # 2. 用文件路径安装
-dsh plugin --profile web add "/path/to/dsh-token-board-0.1.4.tgz"
+dsh plugin --profile web add "/path/to/dsh-token-board-0.1.5.tgz"
 ```
 
 下载后可以先核对内容：
 
 ```bash
-tar -tzf dsh-token-board-0.1.4.tgz
+tar -tzf dsh-token-board-0.1.5.tgz
 ```
 
 ### 装完应该看到什么
