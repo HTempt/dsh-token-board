@@ -1,14 +1,28 @@
 # 发布到 npm
 
 包名：`dsh-token-board`（裸名，无 scope）
-当前版本：`0.1.5` —— **已发布**
-下一版本：`0.2.0` —— 发布中
+当前版本：`0.2.0` —— **已发布**
 发布地址：https://www.npmjs.com/package/dsh-token-board
 
 > **发布与推送需要明确指令**：默认只做本地提交，`git push`、`npm publish`、
 > 建 Release 都要用户说一声才做。约定见 [AGENTS.md](AGENTS.md)。
 
 ## 发布记录
+
+2026-11-15 发布 `0.2.0`（运行时名称统一 + 提供商模型明细 + 旧名自动迁移），验证结果：
+
+| 项 | 值 |
+|---|---|
+| `dist-tags.latest` | `0.2.0` |
+| tarball shasum | `c3b8a92d448ed34eb757ddd93f8d05736cdeb997`（`npm pack` 输出、GitHub Release 资产、registry 回读三方一致） |
+| 包大小 | 290.4 kB（解包 614.9 kB，18 个文件） |
+| git | `release: 0.2.0` + tag `v0.2.0`，已推送 `origin`（576945d） |
+| GitHub Release | id 445898145，资产 `dsh-token-board-0.2.0.tgz` 已上传（sha1 与 registry 一致） |
+| 实装验证 | 干净 profile `dsh plugin add dsh-token-board@0.2.0` → 0.2.0；dump 恰好 1 条 `- id: dsh-token-board / name: dsh-token-board`；tarball 可 `import`，inject 三服务齐全，路由为新名 |
+| token | 0.1.4/0.1.5 用的 token 已失效（401），本次用新建 granular token 发布 |
+
+> 注意：pnpm 的 registry 元数据缓存会让裸名 `add dsh-token-board` 装到旧版
+> （本次实测装出 0.1.5）；锁版本 `@0.2.0` 或清元数据缓存后重装即可（README 有步骤）。
 
 2026-11-06 发布 `0.1.4`（可读模型名 / 0 行过滤 / 日详情工作区分布），registry 侧验证结果：
 
