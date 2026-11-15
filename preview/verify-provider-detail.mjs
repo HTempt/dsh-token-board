@@ -83,29 +83,28 @@ try {
 		await sleep(400);
 		const open = await send("Runtime.evaluate", { expression: `(() => {
 			const providerSection = document.querySelectorAll('.udw_distSection')[0];
-			const detail = providerSection.querySelector('.udw_wsDetail');
+			const detail = providerSection.querySelector('.udw_modelList');
 			if (detail === null) return { open: false };
-			const names = [...detail.querySelectorAll('.udw_modelList > .udw_modelName')].map((el) => el.textContent);
-			const modelRows = [...detail.querySelectorAll('.udw_modelList > .udw_modelDetail')].map((el, i) => {
+			const names = [...detail.querySelectorAll(':scope > .udw_modelName')].map((el) => el.textContent);
+			const modelRows = [...detail.querySelectorAll(':scope > .udw_modelDetail')].map((el, i) => {
 				const tokens = el.querySelector('.udw_modelTokens')?.textContent ?? "";
 				return { name: names[i] ?? "?", tokens };
 			});
 			return {
 				open: true,
-				facts: [...detail.querySelectorAll('.udw_wsFact dt')].map((el) => el.textContent),
-				modelCount: detail.querySelector('.udw_wsToolsHead')?.textContent ?? null,
+				facts: providerSection.querySelectorAll('.udw_wsDetail .udw_wsFact, .udw_wsToolsHead').length,
 				modelRows,
-				barWidths: [...detail.querySelectorAll('.udw_modelFill')].map((el) => el.style.width),
-				descending: modelRows.length >= 2 && modelRows.every((m, i) => i === 0 || true)
+				barWidths: [...detail.querySelectorAll('.udw_modelFill')].map((el) => el.style.width)
 			};
 		})()`, returnByValue: true });
 		const o = open.result.value;
-		console.log("expanded:", o.open, "| header:", JSON.stringify(o.modelCount));
-		console.log("facts:", JSON.stringify(o.facts));
+		console.log("expanded:", o.open);
+		console.log("stray heads/facts:", o.facts);
 		console.log("models:", JSON.stringify(o.modelRows));
 		console.log("bar widths:", JSON.stringify(o.barWidths));
 		if (!o.open) { console.log("FAIL: provider detail did not open"); failed = true; }
 		else {
+			if (o.facts !== 0) { console.log("FAIL: summary facts or section head still rendered"); failed = true; }
 			if (o.modelRows.length === 0) { console.log("FAIL: no model rows in the detail"); failed = true; }
 			if (o.barWidths.length >= 2) {
 				// The bars encode the token order: widths must be non-increasing.
@@ -120,7 +119,7 @@ try {
 		if (!failed) {
 			await send("Runtime.evaluate", { expression: `document.querySelectorAll('.udw_distSection')[0].querySelector('.udw_wsRow[data-expandable="true"] button.udw_wsMain').click()` });
 			await sleep(300);
-			const after = await send("Runtime.evaluate", { expression: `document.querySelectorAll('.udw_distSection')[0].querySelectorAll('.udw_wsDetail').length`, returnByValue: true });
+			const after = await send("Runtime.evaluate", { expression: `document.querySelectorAll('.udw_distSection')[0].querySelectorAll('.udw_modelList').length`, returnByValue: true });
 			console.log("detail bodies after collapse:", after.result.value);
 			if (after.result.value !== 0) { console.log("FAIL: detail did not collapse"); failed = true; }
 		}
