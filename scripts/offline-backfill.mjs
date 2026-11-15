@@ -72,15 +72,15 @@ async function boot(persistence, homeLabel) {
 	const plugin = await import("../lib/index.js");
 	ctx.plugin(plugin, {});
 	await new Promise((resolve) => setTimeout(resolve, 200));
-	const route = routes.find((entry) => entry.path === "/api/usage-dashboard/summary");
+	const route = routes.find((entry) => entry.path === "/api/dsh-token-board/summary");
 	if (route === undefined) throw new Error("summary route not registered");
 	return {
 		async summary(query) {
 			const req = {
 				method: "GET",
-				url: `/api/usage-dashboard/summary?${query}`,
+				url: `/api/dsh-token-board/summary?${query}`,
 				socket: { remoteAddress: "127.0.0.1" },
-				headers: { host: "127.0.0.1:3080", "x-dsh-usage-dashboard-tz-offset": "0", "x-dsh-usage-dashboard-tz-name": "UTC" }
+				headers: { host: "127.0.0.1:3080", "x-dsh-token-board-tz-offset": "0", "x-dsh-token-board-tz-name": "UTC" }
 			};
 			let body = "";
 			await route.handler(req, { writeHead() {}, end(text) { body = text; } });

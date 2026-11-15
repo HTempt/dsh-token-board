@@ -47,6 +47,21 @@
   README「哪些名字叫 dsh-token-board，哪些不叫」一节有说明：改名会丢既有历史或破坏
   兼容，是有意保留的。
 
+### 变更（破坏性）
+
+- **运行时名称全部统一为 `dsh-token-board`**，不再保留 `usage-dashboard` 旧词：
+  - 数据路由 `/api/usage-dashboard/{summary,day}` → `/api/dsh-token-board/{summary,day}`；
+  - 时区请求头 `x-dsh-usage-dashboard-tz-{name,offset}` → `x-dsh-token-board-tz-{name,offset}`；
+  - 数据目录 `~/.dsh/dsh-usage-dashboard/` → `~/.dsh/dsh-token-board/`；
+  - `storages/usage-dashboard-{cache,digests}.json` → `storages/dsh-token-board-{cache,digests}.json`；
+  - 日志前缀 `usage-dashboard:` → `dsh-token-board:`。
+- **升级自动迁移**：首次启动把旧名目录与文件改名到新名（目录整体含 `.bak`；
+  新名已存在时保留新文件、旧文件原样不动，绝不覆盖也绝不删除）。吸收的历史
+  不受影响；回归脚本 `scripts/rename-migrate.mjs` 锁死两条路径（全新迁移 /
+  双名并存）。
+- **第三方调用方注意**：直接请求旧路由或带旧请求头的客户端需要改到新名；
+  本插件的浏览器半（唯一已知调用方）已同步。
+
 ## 0.1.5 — 2026-11-08
 
 ### 新增

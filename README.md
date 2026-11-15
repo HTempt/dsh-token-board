@@ -371,8 +371,20 @@ inject）与 `dsh-client-locale`、`dsh-client-ui-layout`、`dsh-client-ui-sideb
 
 ## 写盘范围（只写自己的文件）
 
-唯一写入是 `<DSH_HOME>/storages/usage-dashboard-cache.json`（临时文件 + rename 原子写）。
-会话存储、共享 ledger、其它插件的缓存都不写。删掉该文件只会触发一次重建。
+三处，全部在 `<DSH_HOME>` 下、全部以包名命名：
+
+| 文件 | 性质 |
+|---|---|
+| `dsh-token-board/statistics.json`（+ 同名 `.bak`） | 吸收的历史，唯一不可重建的数据 |
+| `storages/dsh-token-board-digests.json` | 私有校验摘要 |
+| `storages/dsh-token-board-cache.json` | 可重建的折叠缓存 |
+
+会话存储、共享 ledger、其它插件的缓存都不写。删掉缓存或摘要只会触发一次重建。
+
+> **从 0.1.5 之前的安装升级**：旧名文件（`dsh-usage-dashboard/` 目录、
+> `storages/usage-dashboard-*.json`）在首次启动时**自动迁移**到上表的新名
+> （新名已存在时保留新文件、旧文件原样不动）；历史不丢。详见
+> `scripts/rename-migrate.mjs`。
 
 ## 口径
 
@@ -410,8 +422,8 @@ inject）与 `dsh-client-locale`、`dsh-client-ui-layout`、`dsh-client-ui-sideb
 
 | 路径 | 查询 | 说明 |
 |---|---|---|
-| `/api/usage-dashboard/summary` | `days=30\|92\|365\|all`、`refresh=1` | 窗口内每日数据 + 全时段提供商/模型排名；每天带 `byModel` / `byProvider` / `byWorkspace` |
-| `/api/usage-dashboard/day` | `date=YYYY-MM-DD` | 单日明细，字段与 summary 的一天相同 |
+| `/api/dsh-token-board/summary` | `days=30\|92\|365\|all`、`refresh=1` | 窗口内每日数据 + 全时段提供商/模型排名；每天带 `byModel` / `byProvider` / `byWorkspace` |
+| `/api/dsh-token-board/day` | `date=YYYY-MM-DD` | 单日明细，字段与 summary 的一天相同 |
 
 两者都是 `GET`，且只接受 loopback 对端（按 peer socket 判定，Host 头只作附加检查）。
 
@@ -419,8 +431,8 @@ inject）与 `dsh-client-locale`、`dsh-client-ui-layout`、`dsh-client-ui-sideb
 
 | 请求头 | 含义 |
 |---|---|
-| `x-dsh-usage-dashboard-tz-name` | IANA 时区名（`Asia/Shanghai`、`America/New_York`），浏览器经 `Intl.DateTimeFormat().resolvedOptions().timeZone` 取得 |
-| `x-dsh-usage-dashboard-tz-offset` | 浏览器时区偏移，**东为正**，单位秒（`-new Date().getTimezoneOffset() * 60`，UTC+8 → `28800`） |
+| `x-dsh-token-board-tz-name` | IANA 时区名（`Asia/Shanghai`、`America/New_York`），浏览器经 `Intl.DateTimeFormat().resolvedOptions().timeZone` 取得 |
+| `x-dsh-token-board-tz-offset` | 浏览器时区偏移，**东为正**，单位秒（`-new Date().getTimezoneOffset() * 60`，UTC+8 → `28800`） |
 
 **为什么需要时区名**：数字 offset 只是「此刻」的一个采样值。有夏令时（DST）的地区，
 同一台机器在冬夏报告不同 offset；若用打开页面那一刻的 offset 去折算整个窗口
@@ -468,6 +480,7 @@ node scripts/unit.mjs          # 纯折叠语义 5 项断言
 node scripts/singleledger.mjs  # live+persisted 只计一次
 node scripts/transition.mjs    # live→落盘→扫描 不变
 node scripts/migrate.mjs       # v3 缓存迁移不丢历史
+node scripts/rename-migrate.mjs # 旧名文件（usage-dashboard）自动迁移不丢历史
 node scripts/timezone.mjs      # 窗口/本月跟随浏览器时区
 node scripts/dst.mjs           # 跨夏令时切换仍归到各自的本地日
 node scripts/offline-backfill.mjs  # 插件未运行期间的用量，启动后补统计
@@ -560,20 +573,17 @@ node -e "console.log(require('fs').lstatSync(process.argv[1]).isSymbolicLink())"
 | `lib/index.js` / `lib/usage.js` / `lib/ledger-merge.js` | 必须重启 `dsh web`（宿主半） |
 | `package.json` 或 `cordis.patch.yml` | 重启 `dsh web`，让组合层重新解析 |
 
-注意**运行时数据**不在这个目录里，别混进备份：`~/.dsh/dsh-usage-dashboard/`
-（`statistics.json`）和 `~/.dsh/storages/usage-dashboard-*.json` 都是数据，删掉会
-按会话日志重建（慢，但不丢历史）。
+注意**运行时数据**不在这个目录里，别混进备份：`~/.dsh/dsh-token-board/`
+（`statistics.json` 及其 `.bak`）和 `~/.dsh/storages/dsh-token-board-*.json`
+都是数据。`statistics.json` 是吸收的历史，删了会丢；缓存与摘要删掉会按会话日志
+重建（慢，但不丢历史）。0.1.5 之前的安装里这些文件还在旧名
+（`dsh-usage-dashboard/`、`usage-dashboard-*.json`）下，首次启动自动迁移。
 
-### 哪些名字叫 dsh-token-board，哪些不叫
+### 命名约定
 
-包名、Loader 行 id、侧边栏面板 id、DOM 标记、locale 命名空间全部统一为
-**`dsh-token-board`**。下面这些保留旧词，是有意为之：
+包名、Loader 行 id、侧边栏面板 id、DOM 标记、locale 命名空间、HTTP 路由、
+时区请求头、数据目录与缓存文件名**全部统一为 `dsh-token-board`**。
 
-| 名字 | 为什么不改 |
-|---|---|
-| `~/.dsh/dsh-usage-dashboard/`（`DATA_DIR`） | 磁盘上已存在的统计目录，改名会让既有历史读不到 |
-| `usage-dashboard-cache.json` / `usage-dashboard-digests.json` | 同上，是可重建缓存与校验摘要的文件名 |
-| `/api/usage-dashboard/summary`、`/day` | HTTP 路由，改动会破坏已缓存的客户端 |
-| `x-dsh-usage-dashboard-tz-*` 请求头 | 浏览器与宿主之间的内部协议，成对出现即可，不对外 |
-
-这些都不面向用户，且改动会带来数据或兼容代价，因此只统一了"读者会看到"的那些。
+0.1.5 之前的安装使用旧名 `usage-dashboard`（目录、缓存文件、路由、请求头）；
+首次启动时自动迁移到新名，旧文件在新名已存在时保留不删——迁移规则见
+`lib/index.js` 的 `migrateLegacyNames()`，回归脚本为 `scripts/rename-migrate.mjs`。

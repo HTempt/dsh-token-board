@@ -45,13 +45,13 @@ await new Promise((resolve) => setTimeout(resolve, 200));
 
 /** Read the summary as a viewer at `tzSeconds` (east positive). */
 async function summary(tzSeconds) {
-	const route = registered.find((entry) => entry.path === "/api/usage-dashboard/summary");
+	const route = registered.find((entry) => entry.path === "/api/dsh-token-board/summary");
 	if (route === undefined) throw new Error("summary route not registered");
 	const req = {
 		method: "GET",
-		url: "/api/usage-dashboard/summary?days=2",
+		url: "/api/dsh-token-board/summary?days=2",
 		socket: { remoteAddress: "127.0.0.1" },
-		headers: { host: "127.0.0.1:3080", "x-dsh-usage-dashboard-tz-offset": String(tzSeconds) }
+		headers: { host: "127.0.0.1:3080", "x-dsh-token-board-tz-offset": String(tzSeconds) }
 	};
 	let body = "";
 	const res = { writeHead() {}, end(text) { body = text; } };

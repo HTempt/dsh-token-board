@@ -47,9 +47,10 @@
 
 只写自己的文件：
 
-- `~/.dsh/dsh-usage-dashboard/statistics.json`（统计，防抖 1s 落盘）
-- `<DSH_HOME>/storages/usage-dashboard-cache.json`（可重建的折叠缓存）
-- `<DSH_HOME>/storages/usage-dashboard-digests.json`（校验用摘要）
+- `~/.dsh/dsh-token-board/statistics.json`（统计，防抖 1s 落盘；0.1.5 之前写在
+  `~/.dsh/dsh-usage-dashboard/` 下，升级后首次启动自动迁移）
+- `<DSH_HOME>/storages/dsh-token-board-digests.json`（校验用摘要）
+- `<DSH_HOME>/storages/dsh-token-board-cache.json`（可重建的折叠缓存）
 
 不写会话存储、不写共享 ledger、不写其他组件的缓存。
 

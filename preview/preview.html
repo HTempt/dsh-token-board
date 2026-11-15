@@ -44,7 +44,7 @@
 	const originalFetch = window.fetch.bind(window);
 	window.fetch = function (input, init) {
 		const url = String(input);
-		if (url.startsWith("/api/usage-dashboard/day")) {
+		if (url.startsWith("/api/dsh-token-board/day")) {
 			// The day route is read on demand when a day dialog opens. Synthesize
 			// it from the summary's own histogram so the strip shows a real shape
 			// without a second fixture file: scale the window's 24 slots down to
@@ -70,7 +70,7 @@
 			});
 			return Promise.resolve(new Response(JSON.stringify({ ok: true, date: requested, day, refreshing: false, partial: false, updatedAt: basePayload.updatedAt }), { status: 200, headers: { "content-type": "application/json" } }));
 		}
-		if (url.startsWith("/api/usage-dashboard/summary")) {
+		if (url.startsWith("/api/dsh-token-board/summary")) {
 			if (scene === "error") {
 				return Promise.resolve(new Response("boom", { status: 500 }));
 			}

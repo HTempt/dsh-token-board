@@ -86,7 +86,7 @@ async function call(path, query) {
 		method: "GET",
 		url: `${path}?${query}`,
 		socket: { remoteAddress: "127.0.0.1" },
-		headers: { host: "127.0.0.1:3080", "x-dsh-usage-dashboard-tz-offset": String(tzSeconds) }
+		headers: { host: "127.0.0.1:3080", "x-dsh-token-board-tz-offset": String(tzSeconds) }
 	};
 	let body = "";
 	const res = { writeHead() {}, end(text) { body = text; } };
@@ -97,7 +97,7 @@ async function call(path, query) {
 // A cold fold runs in the background by design, so poll until it settles.
 let payload;
 for (let attempt = 0; attempt < 400; attempt += 1) {
-	payload = await call("/api/usage-dashboard/summary", "days=92");
+	payload = await call("/api/dsh-token-board/summary", "days=92");
 	if (payload.ok !== true) throw new Error(`summary failed: ${payload.message}`);
 	if (payload.refreshing !== true && payload.partial !== true) break;
 	await new Promise((resolve) => setTimeout(resolve, 500));

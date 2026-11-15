@@ -67,7 +67,7 @@ async function call(path, query = "", tzOffsetSeconds = -28800) {
 		method: "GET",
 		url: `${path}${query === "" ? "" : `?${query}`}`,
 		socket: { remoteAddress: "127.0.0.1" },
-		headers: { host: "127.0.0.1:3080", "x-dsh-usage-dashboard-tz-offset": String(tzOffsetSeconds) }
+		headers: { host: "127.0.0.1:3080", "x-dsh-token-board-tz-offset": String(tzOffsetSeconds) }
 	};
 	let status = 0;
 	let body = "";
@@ -80,13 +80,13 @@ async function call(path, query = "", tzOffsetSeconds = -28800) {
 }
 
 const t0 = Date.now();
-let summary = await call("/api/usage-dashboard/summary", "days=92");
+let summary = await call("/api/dsh-token-board/summary", "days=92");
 console.log("first summary ms", Date.now() - t0, "status", summary.status);
 // A cold fold runs in the background by design, so wait for it to settle.
 for (let attempt = 0; attempt < 400; attempt += 1) {
 	if (summary.body.refreshing !== true && summary.body.partial !== true) break;
 	await new Promise((resolve) => setTimeout(resolve, 500));
-	summary = await call("/api/usage-dashboard/summary", "days=92");
+	summary = await call("/api/dsh-token-board/summary", "days=92");
 }
 const payload = summary.body;
 console.log("settled ms", Date.now() - t0, "ok", payload.ok, "sessions", payload.sessions, "days", payload.days.length);
@@ -104,7 +104,7 @@ const check = (label, ok) => {
 
 const lastDay = payload.days.at(-1);
 if (lastDay !== undefined) {
-	const detail = await call("/api/usage-dashboard/day", `date=${lastDay.date}`);
+	const detail = await call("/api/dsh-token-board/day", `date=${lastDay.date}`);
 	const day = detail.body?.day;
 	console.log("day route", detail.status, day?.date, "providerRows", day?.byProvider?.length);
 	const providerSum = day.byProvider.reduce((sum, row) => sum + row.tokens, 0);
@@ -124,11 +124,11 @@ if (lastDay !== undefined) {
 }
 
 const t1 = Date.now();
-const second = await call("/api/usage-dashboard/summary", "days=92");
+const second = await call("/api/dsh-token-board/summary", "days=92");
 console.log("repeat read ms", Date.now() - t1, "days", second.body.days.length);
 check("repeat read returns the same days", JSON.stringify(second.body.days) === JSON.stringify(payload.days));
 
-const bad = await call("/api/usage-dashboard/day", "date=oops");
+const bad = await call("/api/dsh-token-board/day", "date=oops");
 console.log("invalid date", bad.status, JSON.stringify(bad.body));
 check("invalid date rejected", bad.status === 400);
 

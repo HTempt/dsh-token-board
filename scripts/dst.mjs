@@ -42,11 +42,11 @@ await new Promise((resolve) => setTimeout(resolve, 200));
 
 /** Read the summary as a viewer identified by an IANA zone. */
 async function summary({ zone, offsetSeconds }) {
-	const route = registered.find((entry) => entry.path === "/api/usage-dashboard/summary");
+	const route = registered.find((entry) => entry.path === "/api/dsh-token-board/summary");
 	if (route === undefined) throw new Error("summary route not registered");
-	const headers = { host: "127.0.0.1:3080", "x-dsh-usage-dashboard-tz-offset": String(offsetSeconds) };
-	if (zone !== undefined) headers["x-dsh-usage-dashboard-tz-name"] = zone;
-	const req = { method: "GET", url: "/api/usage-dashboard/summary?days=400&from=2026-07-14&to=2026-07-16", socket: { remoteAddress: "127.0.0.1" }, headers };
+	const headers = { host: "127.0.0.1:3080", "x-dsh-token-board-tz-offset": String(offsetSeconds) };
+	if (zone !== undefined) headers["x-dsh-token-board-tz-name"] = zone;
+	const req = { method: "GET", url: "/api/dsh-token-board/summary?days=400&from=2026-07-14&to=2026-07-16", socket: { remoteAddress: "127.0.0.1" }, headers };
 	let body = "";
 	const res = { writeHead() {}, end(text) { body = text; } };
 	await route.handler(req, res);

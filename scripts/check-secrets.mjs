@@ -118,7 +118,9 @@ const ALLOWED = [
 	"/home/dev/",
 	// The generic examples the docs use.
 	"D:\\projects\\",
-	// The plugin's own data directory, named generically in the docs.
+	// The plugin's own data directory (current name, plus the pre-rename one the
+	// migration docs still mention).
+	"dsh-token-board",
 	"dsh-usage-dashboard"
 ];
 

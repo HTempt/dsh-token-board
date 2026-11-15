@@ -55,13 +55,13 @@ await new Promise((resolve) => setTimeout(resolve, 200));
 
 /** Call the summary route with a UTC+8 viewer offset. */
 async function summary(query) {
-	const route = registered.find((entry) => entry.path === "/api/usage-dashboard/summary");
+	const route = registered.find((entry) => entry.path === "/api/dsh-token-board/summary");
 	if (route === undefined) throw new Error("summary route not registered");
 	const req = {
 		method: "GET",
-		url: `/api/usage-dashboard/summary?${query}`,
+		url: `/api/dsh-token-board/summary?${query}`,
 		socket: { remoteAddress: "127.0.0.1" },
-		headers: { host: "127.0.0.1:3080", "x-dsh-usage-dashboard-tz-offset": "28800" }
+		headers: { host: "127.0.0.1:3080", "x-dsh-token-board-tz-offset": "28800" }
 	};
 	let body = "";
 	const res = { writeHead() {}, end(text) { body = text; } };

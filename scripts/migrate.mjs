@@ -36,7 +36,7 @@ const legacy = {
 	},
 	hours: {}
 };
-writeFileSync(join(home, "storages", "usage-dashboard-cache.json"), JSON.stringify(legacy));
+writeFileSync(join(home, "storages", "dsh-token-board-cache.json"), JSON.stringify(legacy));
 
 process.env.DSH_HOME = home;
 const { Context } = await harness("@deepseek-ai/cordis");
@@ -53,13 +53,13 @@ ctx.plugin(plugin, {});
 await new Promise((resolve) => setTimeout(resolve, 200));
 
 async function summary() {
-	const route = registered.find((entry) => entry.path === "/api/usage-dashboard/summary");
+	const route = registered.find((entry) => entry.path === "/api/dsh-token-board/summary");
 	if (route === undefined) throw new Error("summary route not registered");
 	const req = {
 		method: "GET",
-		url: "/api/usage-dashboard/summary?days=all",
+		url: "/api/dsh-token-board/summary?days=all",
 		socket: { remoteAddress: "127.0.0.1" },
-		headers: { host: "127.0.0.1:3080", "x-dsh-usage-dashboard-tz-offset": "28800" }
+		headers: { host: "127.0.0.1:3080", "x-dsh-token-board-tz-offset": "28800" }
 	};
 	let body = "";
 	const res = { writeHead() {}, end(text) { body = text; } };
