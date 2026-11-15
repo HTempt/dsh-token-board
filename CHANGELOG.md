@@ -37,6 +37,16 @@
   3. **模型数字右缘与行头数字不对齐**（凸出 16px）——网格右缘补 16px margin
      （8px 行内边距 + 8px 滚动条补偿），无头 Chrome 实测 `alignDelta: 0`。
 
+### 文档
+
+- 名称统一清理：`lib/index.js` 的 `@module` 标注、预览页标题、`PUBLISHING.md` 里
+  0.1.0 时代的 `- id: usage-dashboard` 记录与「GitHub 仓库名仍是 dsh-usage-dashboard」
+  的过时说明（仓库早已更名为 `HTempt/dsh-token-board`），以及 README 中三处仍在描述
+  旧「按提供商/按模型」页签结构的段落，全部改为当前的三页签结构。
+- 磁盘数据目录、缓存文件名、HTTP 路由与时区请求头仍保留 `usage-dashboard` 旧词——
+  README「哪些名字叫 dsh-token-board，哪些不叫」一节有说明：改名会丢既有历史或破坏
+  兼容，是有意保留的。
+
 ## 0.1.5 — 2026-11-08
 
 ### 新增

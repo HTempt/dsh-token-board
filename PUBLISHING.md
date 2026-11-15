@@ -47,7 +47,7 @@ DSH_HOME=<scratch> dsh --dump-config --profile web                → - id: dsh-
 
 ```
 dsh plugin --profile web add dsh-token-board   → bundles 自动登记 dsh-token-board
-dsh --dump-config --profile web                → - id: usage-dashboard / name: dsh-token-board（恰好 1 条）
+dsh --dump-config --profile web                → - id: dsh-token-board / name: dsh-token-board（恰好 1 条）
 import('dsh-token-board')                      → OK，inject 三服务齐全
 readPluginMeta                                 → error 无、icon 1478 字节
 重跑 add（升级路径）                            → Already up to date，不重复登记
@@ -150,7 +150,7 @@ npm whoami    # 应输出你的用户名
 ### 2. 在仓库目录检查
 
 ```bash
-cd dsh-token-board          # 本地目录名 == 包名；GitHub 仓库名仍是 dsh-usage-dashboard
+cd dsh-token-board          # 本地目录名 == 包名 == GitHub 仓库名（HTempt/dsh-token-board）
 git status                 # 应为 clean，且已推送
 npm pack --dry-run         # 应为 17 个文件（0.1.4 起），且含 cordis.patch.yml
 ```
@@ -192,7 +192,7 @@ npm view dsh-token-board dist.tarball --registry=https://registry.npmjs.org/
 
 ```bash
 DSH_HOME=/tmp/npm_e2e dsh plugin --profile web add dsh-token-board
-DSH_HOME=/tmp/npm_e2e dsh --dump-config --profile web | grep -c "^- id: usage-dashboard"
+DSH_HOME=/tmp/npm_e2e dsh --dump-config --profile web | grep -c "^- id: dsh-token-board"
 # 期望 1
 rm -rf /tmp/npm_e2e
 ```
