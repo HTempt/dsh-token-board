@@ -3,7 +3,7 @@
 面向用户的变化记录在这里。**未发布的改动先记在「未发布」，发版时整段改成版本号**，
 并同步 `package.json` 的 `version`。发布步骤见 [PUBLISHING.md](PUBLISHING.md)。
 
-## 未发布
+## 0.2.0 — 2026-11-15
 
 ### 新增
 
@@ -61,6 +61,11 @@
   双名并存）。
 - **第三方调用方注意**：直接请求旧路由或带旧请求头的客户端需要改到新名；
   本插件的浏览器半（唯一已知调用方）已同步。
+
+**发版验证**（2026-11-15）：`check-client` / `unit`（15 项）/ `rename-migrate`
+（全新迁移 + 双名并存两路径）/ `migrate` / `timezone` / `dst` / `singleledger` /
+`transition` / `offline-backfill` / `smoke-host` / `check-secrets` 全部通过；
+预览（`verify-single-source` / `verify-provider-detail`）渲染正常、控制台无报错。
 
 ## 0.1.5 — 2026-11-08
 

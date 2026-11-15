@@ -1,7 +1,8 @@
 # 发布到 npm
 
 包名：`dsh-token-board`（裸名，无 scope）
-当前版本：`0.1.4` —— **已发布**
+当前版本：`0.1.5` —— **已发布**
+下一版本：`0.2.0` —— 发布中
 发布地址：https://www.npmjs.com/package/dsh-token-board
 
 > **发布与推送需要明确指令**：默认只做本地提交，`git push`、`npm publish`、
